@@ -2,20 +2,43 @@
 	<div id="app">
 		Example for Vue-mount
 
-		<alert></alert>
+		<div id="target" ref="target"></div>
+
+		<alert ref="alert"></alert>
 	</div>
 </template>
 
 <script>
-import alert from './alert';
+import Alert from './alert/index';
+import Mount from '../src';
 
 export default {
 	name: "app",
+	components: {
+		Alert
+	},
 	mounted() {
-		alert.info({
+		const alert = new Mount(Alert).mount({
+			target: this.$refs.alert,
+			props: {
+				testProps: 123
+			},
+			data: {
+				testData: 321
+			}
+		});
+        alert.add({
 			content: 'VueMount-VueMount-VueMount-VueMount',
 			duration: 10
 		});
+		
+		alert.$emit('event', 123);
+		
+		// const alert2 = new Mount(Alert).mount();
+        // alert2.add({
+		// 	content: 'VueMount-22222',
+		// 	duration: 10
+		// });
 	}
 };
 </script>

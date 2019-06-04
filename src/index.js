@@ -1,12 +1,12 @@
 import Vue from 'vue';
-import { isEmptyObject } from './utils';
+import { isType, isEmptyObject, isVueInstance, findParentVm, getElement } from './utils';
 
 function parseOptions(options) {
-    const { props = {}, data = {}, el } = options || {};
+    const { props = {}, data = {}, target } = options || {};
     return {
-        el,
+        target: getElement(target),
         propsData: props,
-        data,
+        targetData: data,
     };
 }
 
@@ -18,13 +18,15 @@ class Mount {
 
     constructor(component, options) {
         this.component_constructor = Vue.extend(component);
-        Vue.component(component.name, component);
         this.options = parseOptions(options);
     }
 
     getInstance(opt) {
-        const options = isEmptyObject(opt) ? this.options : parseOptions(opt);
+        const options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
         const instance = this.component_instance || new this.component_constructor(options);
+        if (isType(options.targetData, 'Object')) {
+            Object.assign(instance, options.targetData);
+        }
         return this.component_instance = instance;
     }
 
@@ -34,10 +36,26 @@ class Mount {
 
     mount(opt) {
         const instance = this.component_vm = this.getInstance(opt);
-        instance.$mount();
-
-        if (!this.options.el) {
+        
+        if (!this.options.target) {
+            instance.$mount(this.options.target);
             document.body.appendChild(this.component_vm.$el);
+        }
+        else {
+            let hostVm = isVueInstance(this.options.target);
+            if (hostVm) {
+                hostVm.$destroy();
+            }
+            // adding to components tree
+            if (!instance._isMounted) {
+                const parentVm = findParentVm(this.options.target);
+                if (parentVm) {
+                    parentVm.$children.push(instance);
+                    instance.$parent = parentVm;
+                    instance.$root = parentVm.$root;
+                }
+            }
+            instance.$mount(this.options.target);
         }
         return instance;
     }

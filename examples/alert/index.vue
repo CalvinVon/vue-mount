@@ -17,10 +17,17 @@ function getUuid() {
 
 export default {
 	name: 'alert',
+	props: {
+		testProps: Number
+	},
 	data() {
 		return {
-			notices: []
+			notices: [],
+			testData: 123
 		};
+	},
+	created() {
+		this.$on('event', e => console.log('on event, ', e))
 	},
 	methods: {
 		add(notice) {
