@@ -5,6 +5,7 @@ import App from './App.vue';
 import Alert from "./alert/index";
 import Mount from "../src";
 
+
 Vue.config.debug = true;
 
 Vue.prototype.$main = 123;

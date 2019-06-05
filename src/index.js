@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement } from './utils';
+import { isOneOf, isType, isEmptyObject, isVueInstance, findParentVm, getElement } from './utils';
 
 /**
  * 
@@ -8,13 +8,15 @@ import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm,
  * @param {Object} options.data component data
  * @param {Object} options.target component mount target. Options: `new`,`root` Default: `new`
  * @param {Object} options.root app root element
+ * @param {Object} options.rootOptions app root instance options
  */
 function parseOptions(options) {
     const {
         props = {},
         data = {},
         target = 'new',
-        root = '#app'
+        root = '#app',
+        rootOptions = {}
     } = options || {};
 
     const rootEl = getElement(root);
@@ -27,6 +29,7 @@ function parseOptions(options) {
         targetElement: getElement(target),
         propsData: props,
         targetData: data,
+        rootOptions
     };
 }
 
@@ -81,7 +84,7 @@ class Mount {
             else {
                 this._to_create_root = true;
 
-                const rootVue = new Vue({
+                const rootOptions = {
                     data: options.propsData,
                     render: h => {
                         const component = this.component_options;
@@ -89,7 +92,12 @@ class Mount {
                             props: options.propsData
                         });
                     }
-                });
+                };
+
+                if (isType(options.rootOptions, 'Object')) {
+                    Object.assign(rootOptions, options.rootOptions);
+                }
+                const rootVue = new Vue(rootOptions);
                 if (options.rootEl) {
                     if (options.rootVm) {
                         rootVue.$mount();

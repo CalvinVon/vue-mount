@@ -57,7 +57,7 @@ function getElement(target) {
         return document.querySelector(target);
     }
     else {
-        return null;
+        return target.elm || null;
     }
 }
 

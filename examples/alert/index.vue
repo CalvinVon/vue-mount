@@ -78,10 +78,7 @@ export default {
 
 <style>
 .alert {
-	position: fixed;
 	width: 100%;
-	top: 16px;
-	left: 0;
 	text-align: center;
 	pointer-events: none;
 }

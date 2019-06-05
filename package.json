@@ -1,11 +1,14 @@
 {
   "name": "vue-mount",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A tool for dynamic mounting Vue components.",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "module": "es/index.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build:lib": "cross-env BABEL_ENV=umd babel src --out-dir lib",
+    "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
+    "build:dist": "cross-env BABEL_ENV=umd webpack --config webpack.config.js",
     "test:unit": "vue-cli-service test:unit"
   },
   "keywords": [
@@ -26,15 +29,18 @@
     "@vue/cli-plugin-unit-mocha": "^3.7.0",
     "@vue/cli-service": "^3.7.0",
     "@vue/test-utils": "^1.0.0-beta.29",
+    "babel-plugin-add-module-exports": "^1.0.2",
     "chai": "^4.2.0",
     "cross-env": "^5.2.0",
     "expect": "^24.8.0",
     "jsdom": "^15.1.0",
     "jsdom-global": "^3.0.2",
     "mocha": "^6.1.4",
+    "uglifyjs-webpack-plugin": "^2.1.3",
     "vue": "^2.6.10",
     "vue-router": "^3.0.6",
     "vue-template-compiler": "^2.5.21",
-    "webpack": "^4.32.2"
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
   }
 }

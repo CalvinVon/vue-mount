@@ -6,5 +6,5 @@ module.exports = {
             template: 'examples/index.html',
             filename: 'index.html'
         }
-    }
+    },
 }

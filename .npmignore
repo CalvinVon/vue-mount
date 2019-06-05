@@ -1,0 +1,10 @@
+src/
+node_modules/
+tests/
+.nyc_output/
+coverage/
+.vscode/
+webpack.config.js
+babel.config.js
+.travis.yml
+.browserslistrc
