@@ -38,7 +38,6 @@ class Mount {
     component_options;
     component_constructor;
     component_instance;
-    component_vm;
 
     _to_append_component = false;
     _to_append_root = false;
@@ -61,7 +60,14 @@ class Mount {
         const options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
 
         if (this.component_instance) {
-            return this.component_instance;
+            // Instance has been/is being destroyed
+            if (this.component_instance._isDestroyed || this.component_instance._isBeingDestroyed) {
+                this.destroy();
+                return this.getInstance(opt);
+            }
+            else {
+                return this.component_instance;
+            }
         }
 
         // Has specific target element
@@ -139,7 +145,7 @@ class Mount {
      * @param {Object} opt MountOptions
      */
     mount(opt) {
-        const instance = this.component_vm = this.getInstance(opt);
+        const instance = this.component_instance = this.getInstance(opt);
         const options = this.options;
 
         // Instance would not mount more than once
@@ -181,8 +187,24 @@ class Mount {
         return instance;
     }
 
+    /**
+     * @returns {Vue}
+     */
+    destroy() {
+        const instance = this.component_instance;
+        instance.$destroy();
+        instance.$el && instance.$el.parentNode.removeChild(instance.$el);
+        this.component_instance = null;
+
+        this._to_append_component = false;
+        this._to_append_root = false;
+        this._to_create_root = false;
+        this._created_root_vue = null;
+        return instance;
+    }
+
     getDom() {
-        return this.component_vm && this.component_vm.$el;
+        return this.component_instance && this.component_instance.$el;
     }
 }
 

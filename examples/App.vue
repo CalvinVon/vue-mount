@@ -12,7 +12,7 @@
 		<div id="target"
 		     ref="target"></div>
 
-		<alert ref="alert"></alert>
+		<!-- <alert ref="alert"></alert>
 
 		<a-slot ref="slot">
 			<alert></alert>
@@ -20,7 +20,7 @@
 			<template #mount>
 				<alert></alert>
 			</template>
-		</a-slot>
+		</a-slot> -->
 	</div>
 </template>
 
@@ -130,25 +130,45 @@ export default {
 		mountSlot() {}
 	},
 	mounted() {
-		const slot = mount(Slot, {
-			target: this.$refs.slot.$slots.default[0],
+		// const slot = mount(Slot, {
+		// 	target: this.$refs.slot.$slots.default[0],
+		// 	props: {
+		// 		testProps: 123
+		// 	},
+		// 	data: {
+		// 		id: 1
+		// 	}
+		// });
+
+		// const slot2 = mount(Slot, {
+		// 	target: slot.$el.querySelector('.default-slot'),
+		// 	props: {
+		// 		testProps: 123
+		// 	},
+		// 	data: {
+		// 		id: 2
+		// 	}
+		// });
+
+		const mountAlert = new Mount(Alert, {
 			props: {
 				testProps: 123
 			},
 			data: {
-				id: 1
+				target: "root",
+				notices: [
+					{
+						content: "mountNew",
+						duration: 10
+					}
+				]
 			}
 		});
 
-		const slot2 = mount(Slot, {
-			target: slot.$el.querySelector('.default-slot'),
-			props: {
-				testProps: 123
-			},
-			data: {
-				id: 2
-			}
-		});
+		mountAlert.getInstance();
+		mountAlert.mount();
+		mountAlert.mount();
+		console.log(mountAlert)
 	}
 };
 </script>
