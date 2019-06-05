@@ -1,6 +1,6 @@
 {
   "name": "vue-mount",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A tool for dynamic mounting Vue components.",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -18,6 +18,14 @@
     "dynamic"
   ],
   "author": "calvin_von",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CalvinVon/vue-mount.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CalvinVon/vue-mount/issues"
+  },
+  "homepage": "https://github.com/CalvinVon/vue-mount#readme",
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.4.4",

@@ -55,6 +55,7 @@ class Mount {
      * Generate instance (only once)
      * @description Only generate vue component instannce (or vue instance), and would do nothing with components tree
      * @param {MountOptions} opt mount options
+     * @returns {Vue}
      */
     getInstance(opt = {}) {
         const options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));

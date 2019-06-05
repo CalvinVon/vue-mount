@@ -55,8 +55,6 @@ function () {
 
     _defineProperty(this, "component_instance", void 0);
 
-    _defineProperty(this, "component_vm", void 0);
-
     _defineProperty(this, "_to_append_component", false);
 
     _defineProperty(this, "_to_append_root", false);
@@ -73,6 +71,7 @@ function () {
    * Generate instance (only once)
    * @description Only generate vue component instannce (or vue instance), and would do nothing with components tree
    * @param {MountOptions} opt mount options
+   * @returns {Vue}
    */
 
 
@@ -85,7 +84,13 @@ function () {
       var options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
 
       if (this.component_instance) {
-        return this.component_instance;
+        // Instance has been/is being destroyed
+        if (this.component_instance._isDestroyed || this.component_instance._isBeingDestroyed) {
+          this.destroy();
+          return this.getInstance(opt);
+        } else {
+          return this.component_instance;
+        }
       } // Has specific target element
 
 
@@ -160,7 +165,7 @@ function () {
   }, {
     key: "mount",
     value: function mount(opt) {
-      var instance = this.component_vm = this.getInstance(opt);
+      var instance = this.component_instance = this.getInstance(opt);
       var options = this.options; // Instance would not mount more than once
 
       if (instance._isMounted) return instance; // Append to root vue instance
@@ -199,10 +204,27 @@ function () {
       instance.$el.__mount__ = this;
       return instance;
     }
+    /**
+     * @returns {Vue}
+     */
+
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      var instance = this.component_instance;
+      instance.$destroy();
+      instance.$el && instance.$el.parentNode.removeChild(instance.$el);
+      this.component_instance = null;
+      this._to_append_component = false;
+      this._to_append_root = false;
+      this._to_create_root = false;
+      this._created_root_vue = null;
+      return instance;
+    }
   }, {
     key: "getDom",
     value: function getDom() {
-      return this.component_vm && this.component_vm.$el;
+      return this.component_instance && this.component_instance.$el;
     }
   }]);
 
