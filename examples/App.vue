@@ -1,43 +1,63 @@
 <template>
 	<div id="app">
 		Example for Vue-mount
+		{{ _uid }}
 
-		<div id="target" ref="target"></div>
+		<button @click="mount">mount</button>
 
-		<alert ref="alert"></alert>
+		<div id="target"
+		     ref="target"></div>
+
+		<!-- <alert ref="alert"></alert> -->
 	</div>
 </template>
 
 <script>
-import Alert from './alert/index';
-import Mount from '../src';
+import Alert from "./alert/index";
+import Mount, { mount } from "../src";
 
 export default {
 	name: "app",
 	components: {
 		Alert
 	},
+	data() {
+		return {
+			uid: this._uid,
+			alert: "#target"
+		};
+	},
+	methods: {
+		mount() {
+			const alert = this.alert = mount(Alert, {
+				props: {
+					testProps: 123
+				},
+				data: {
+					notices: [
+						{
+							content: "VueMount-VueMount-VueMount-VueMount",
+							duration: 10
+						}
+					]
+				}
+			});
+		}
+	},
 	mounted() {
-		const alert = new Mount(Alert).mount({
-			target: this.$refs.alert,
-			props: {
-				testProps: 123
-			},
-			data: {
-				testData: 321
-			}
-		});
-        alert.add({
-			content: 'VueMount-VueMount-VueMount-VueMount',
-			duration: 10
-		});
-		
-		alert.$emit('event', 123);
-		
-		// const alert2 = new Mount(Alert).mount();
-        // alert2.add({
-		// 	content: 'VueMount-22222',
-		// 	duration: 10
+		// const alert = new Mount(Alert).mount({
+		// 	target: '#aaa',
+		// 	props: {
+		// 		testProps: 123
+		// 	},
+		// 	data: {
+		// 		notices: [
+		// 			{
+		// 				content: "VueMount-VueMount-VueMount-VueMount",
+		// 				duration: 100
+		// 			}
+		// 		]
+		// 	}
 		// });
 	}
 };

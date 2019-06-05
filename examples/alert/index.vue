@@ -1,5 +1,6 @@
 <template>
 	<div class="alert">
+		{{ _uid }}
 		<div class="alert-main"
 		     v-for="item in notices"
 		     :key="item.name">
@@ -16,18 +17,31 @@ function getUuid() {
 }
 
 export default {
-	name: 'alert',
+	name: "alert",
 	props: {
 		testProps: Number
 	},
 	data() {
 		return {
-			notices: [],
+			uid: this._uid,
+			notices: [
+				{
+					content: "Alert-Alert-Alert-Alert",
+					duration: 10
+				}
+			],
 			testData: 123
 		};
 	},
 	created() {
-		this.$on('event', e => console.log('on event, ', e))
+		this.$on("event", e => console.log("on event, ", e));
+		console.log("created");
+	},
+	mounted() {
+		console.log("mounted");
+	},
+	beforeDestroy() {
+		console.log("beforeDestroy");
 	},
 	methods: {
 		add(notice) {

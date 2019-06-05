@@ -33,6 +33,7 @@
     "jsdom-global": "^3.0.2",
     "mocha": "^6.1.4",
     "vue": "^2.6.10",
+    "vue-router": "^3.0.6",
     "vue-template-compiler": "^2.5.21",
     "webpack": "^4.32.2"
   }
