@@ -3,7 +3,9 @@
 		Example for Vue-mount
 		{{ _uid }}
 
-		<button @click="mount">mount</button>
+		<button @click="mountRoot">mountRoot</button>
+		<button @click="mountApp">mountApp</button>
+		<button @click="mountRef">mountRef</button>
 
 		<div id="target"
 		     ref="target"></div>
@@ -28,12 +30,48 @@ export default {
 		};
 	},
 	methods: {
-		mount() {
-			const alert = this.alert = mount(Alert, {
+		mountRoot() {
+			mount(Alert, {
+				target: "root",
 				props: {
 					testProps: 123
 				},
 				data: {
+					target: "root",
+					notices: [
+						{
+							content: "VueMount-VueMount-VueMount-VueMount",
+							duration: 10
+						}
+					]
+				}
+			});
+		},
+		mountApp() {
+			mount(Alert, {
+				target: "#app",
+				props: {
+					testProps: 123
+				},
+				data: {
+					target: "#app",
+					notices: [
+						{
+							content: "VueMount-VueMount-VueMount-VueMount",
+							duration: 10
+						}
+					]
+				}
+			});
+		},
+		mountRef() {
+			mount(Alert, {
+				target: this.$refs.target,
+				props: {
+					testProps: 123
+				},
+				data: {
+					target: this.$refs.target,
 					notices: [
 						{
 							content: "VueMount-VueMount-VueMount-VueMount",
@@ -44,22 +82,7 @@ export default {
 			});
 		}
 	},
-	mounted() {
-		// const alert = new Mount(Alert).mount({
-		// 	target: '#aaa',
-		// 	props: {
-		// 		testProps: 123
-		// 	},
-		// 	data: {
-		// 		notices: [
-		// 			{
-		// 				content: "VueMount-VueMount-VueMount-VueMount",
-		// 				duration: 100
-		// 			}
-		// 		]
-		// 	}
-		// });
-	}
+	mounted() {}
 };
 </script>
 

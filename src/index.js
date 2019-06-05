@@ -1,6 +1,14 @@
 import Vue from 'vue';
-import { isOneOf, isType, isEmptyObject, isVueInstance, findParentVm, getElement } from './utils';
+import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement } from './utils';
 
+/**
+ * 
+ * @param {MountOptions} options
+ * @param {Object} options.props component props data
+ * @param {Object} options.data component data
+ * @param {Object} options.target component mount target. Options: `new`,`root` Default: `new`
+ * @param {Object} options.root app root element
+ */
 function parseOptions(options) {
     const {
         props = {},
@@ -57,10 +65,7 @@ class Mount {
         if (options.targetElement) {
             this._to_append_component = true;
 
-            const instance = this.component_instance = new this.component_constructor(options);
-            if (isType(options.targetData, 'Object')) {
-                Object.assign(instance, options.targetData);
-            }
+            this.component_instance = new this.component_constructor(options);
         }
 
         // Would mount append to root
@@ -112,7 +117,10 @@ class Mount {
             throw new Error(`[vue-mount] Can't mount to target with value [${options.target}]`);
         }
 
-        // this.component_instance.__mount__ = this;
+        if (isType(options.targetData, 'Object')) {
+            Object.assign(this.component_instance, options.targetData);
+        }
+        this.component_instance.__mount__ = this;
         return this.component_instance;
     }
 
@@ -150,7 +158,7 @@ class Mount {
                 const _parent = hostVm.$parent;
                 hostVm.$destroy();
                 instance.$parent = _parent;
-                _parent.$children = [...new Set([..._parent.$children, instance])];
+                _parent && (_parent.$children = [...new Set([..._parent.$children, instance])]);
             }
 
             const parentVm = findParentVm(this.options.targetElement);

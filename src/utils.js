@@ -26,6 +26,21 @@ function isVueInstance(el) {
     return el.__vue__ && el.__vue__ instanceof Vue && el.__vue__;
 }
 
+/**
+ * judge vm is an root vue instance
+ * @param {Vue} vm vue instance
+ */
+function isRootVue(vm) {
+    if (vm && vm.$children[0]) {
+        const child = vm.$children[0];
+        if (child.$el === vm.$el) {
+            // Is an Vue root instance but not an Vue component
+            return true;
+        }
+    }
+    return false;
+}
+
 function isMountInstance(el) {
     return el.__mount__ && el.__mount__ instanceof Mount && el.__mount__;
 }
@@ -60,12 +75,10 @@ function findParentVm(el) {
             parentNode = parentNode.parentNode;
         }
 
-        if (parentVm.$children[0]) {
+        if (isRootVue(parentVm)) {
             const child = parentVm.$children[0];
-            if (child.$el === parentVm.$el) {
-                // Is an Vue root instance but not an Vue component
-                return child;
-            }
+            // Is an Vue root instance but not an Vue component
+            return child;
         }
         return parentVm;
     }
@@ -77,6 +90,7 @@ export {
     isType,
     isEmptyObject,
     isVueInstance,
+    isRootVue,
     isMountInstance,
     getElement,
     findParentVm

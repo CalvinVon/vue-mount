@@ -23,6 +23,7 @@ export default {
 	},
 	data() {
 		return {
+			target: null,
 			uid: this._uid,
 			notices: [
 				{
@@ -30,7 +31,6 @@ export default {
 					duration: 10
 				}
 			],
-			testData: 123
 		};
 	},
 	created() {
