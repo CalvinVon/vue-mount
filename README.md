@@ -36,19 +36,6 @@ or via yarn:
 yarn add vue-mount
 ```
 
-or via CDN
-```html
-<!-- import Vue. -->
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.runtime.common.prod.js"></script>
-
-<!-- import vue-mount -->
-<script src="https://cdn.jsdelivr.net/npm/vue-mount/dist/vue-mount.min.js"></script>
-<script>
-    var mount = window[VueMount].mount;
-    var Mount = window[VueMount].default;
-</script>
-```
-
 # Usage
 ### Typical usage
 ```js
