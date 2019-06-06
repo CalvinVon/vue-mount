@@ -11,7 +11,7 @@ A tool for dynamic mounting Vue components.
 - [Getting Started](#Getting-Started)
     - [Install](#Install)
 - [Usage](#Usage)
-    - [Typical usage](#Typical-usage)
+    - [Basic usage](#Basic-usage)
     - [Advanced usage](#Advanced-usage)
 - [MountOption](#MountOption)
     - [target](#target)
