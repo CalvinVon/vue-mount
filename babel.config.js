@@ -22,7 +22,7 @@ module.exports = {
                 ]
             ],
             plugins: [
-                "add-module-exports"
+                // "add-module-exports"
             ]
         },
         "test": {

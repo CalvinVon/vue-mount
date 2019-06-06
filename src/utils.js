@@ -23,7 +23,7 @@ function isEmptyObject(obj) {
  * @param {Element} el
  */
 function isVueInstance(el) {
-    return el.__vue__ && el.__vue__ instanceof Vue && el.__vue__;
+    return el && el.__vue__ && el.__vue__ instanceof Vue && el.__vue__;
 }
 
 /**

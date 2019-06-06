@@ -47,6 +47,19 @@ import Alert from "./alert.vue";
 const alert = mount(Alert);
 ```
 
+or via CDN
+```html
+<!-- import Vue. -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+
+<!-- import vue-mount -->
+<script src="https://cdn.jsdelivr.net/npm/vue-mount/dist/vue-mount.min.js"></script>
+<script>
+    var mount = window['VueMount'].mount;
+    var Mount = window['VueMount'].default;
+</script>
+```
+
 ### Advanced usage
 ```js
 // The exposed method `mount(cmp, opt)` is the syntactic sugar of `new Mount(cmp, opt).mount()`

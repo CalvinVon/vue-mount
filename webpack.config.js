@@ -6,13 +6,15 @@ module.exports = {
     entry: {
         'vue-mount': './src/index.js'
     },
-    externals: ['vue'],
+    externals: {
+        'vue': 'Vue'
+    },
     output: {
         path: path.resolve(__dirname, './dist'),
         filename: '[name].min.js',
         libraryTarget: 'umd',
         library: 'VueMount',
-        globalObject: 'typeof self !== \'undefined\' ? self : this',
+        // globalObject: 'typeof self !== \'undefined\' ? self : this',
     },
     module: {
         rules: [{
