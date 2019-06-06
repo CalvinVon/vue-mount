@@ -36,17 +36,6 @@ or via yarn:
 yarn add vue-mount
 ```
 
-# Usage
-### Typical usage
-```js
-import { mount } from "vue-mount";
-// 
-import Alert from "./alert.vue";
-
-// mount component and return instance
-const alert = mount(Alert);
-```
-
 or via CDN
 ```html
 <!-- import Vue. -->
@@ -58,6 +47,18 @@ or via CDN
     var mount = window['VueMount'].mount;
     var Mount = window['VueMount'].default;
 </script>
+```
+
+
+# Usage
+### Basic usage
+```js
+import { mount } from "vue-mount";
+// 
+import Alert from "./alert.vue";
+
+// mount component and return instance
+const alert = mount(Alert);
 ```
 
 ### Advanced usage
