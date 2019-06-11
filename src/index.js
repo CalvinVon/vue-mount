@@ -14,6 +14,7 @@ function parseOptions(options) {
     const {
         props = {},
         data = {},
+        on = {},
         target = 'new',
         root = '#app',
         rootOptions = {}
@@ -29,6 +30,7 @@ function parseOptions(options) {
         targetElement: getElement(target),
         propsData: props,
         targetData: data,
+        targetEventListener: on,
         rootOptions
     };
 }
@@ -42,6 +44,7 @@ class Mount {
     _to_append_component = false;
     _to_append_root = false;
     _to_create_root = false;
+    _is_destroyed = false;
     _created_root_vue;
 
     constructor(component, options) {
@@ -59,6 +62,8 @@ class Mount {
      */
     getInstance(opt = {}) {
         const options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
+
+        if (this._is_destroyed) return null;
 
         if (this.component_instance) {
             // Instance has been/is being destroyed
@@ -132,10 +137,49 @@ class Mount {
             throw new Error(`[vue-mount] Can't mount to target with value [${options.target}]`);
         }
 
+        // Modify component data
         if (isType(options.targetData, 'Object')) {
             Object.assign(this.component_instance, options.targetData);
         }
-        this.component_instance.__mount__ = this;
+
+
+        // Attach component event listeners
+        if (isType(options.targetEventListener, 'Object')) {
+            Object.keys(options.targetEventListener).forEach(event => {
+                const value = options.targetEventListener[event];
+                let eventListener,
+                    attachMethod = this.component_instance.$on;
+
+                // Parse event listener config
+                if (isType(value, 'Function')) {
+                    eventListener = value;
+
+                }
+                else if (isType(value, 'Object')) {
+                    const { handler, once = false } = value;
+                    if (once) {
+                        attachMethod = this.component_instance.$once;
+                    }
+                    eventListener = handler;
+                }
+
+                const callback = (...args) => {
+                    eventListener.apply(this, [...args, this.component_instance, this]);
+                };
+
+                // Attach listener
+                attachMethod.call(this.component_instance, event, callback);
+            });
+        }
+
+        if (this._to_append_root) {
+            if (this._to_create_root) {
+                // Emit instance mount event
+                this.component_instance.$emit('mount:mount');
+            }
+        }
+
+        this.component_instance && (this.component_instance.__mount__ = this);
         return this.component_instance;
     }
 
@@ -150,7 +194,7 @@ class Mount {
         const options = this.options;
 
         // Instance would not mount more than once
-        if (instance._isMounted) return instance;
+        if (!instance || instance._isMounted) return instance;
 
         // Append to root vue instance
         if (this._to_append_root) {
@@ -171,6 +215,7 @@ class Mount {
             let hostVm = isVueInstance(this.options.targetElement);
             if (hostVm) {
                 const _parent = hostVm.$parent;
+                hostVm.$emit('mount:destroy');
                 hostVm.$destroy();
                 instance.$parent = _parent;
                 _parent && (_parent.$children = [...new Set([..._parent.$children, instance])]);
@@ -185,6 +230,8 @@ class Mount {
             instance.$mount(this.options.targetElement);
         }
         instance.$el.__mount__ = this;
+        // Emit instance mount event
+        instance.$emit('mount:mount');
         return instance;
     }
 
@@ -193,6 +240,7 @@ class Mount {
      */
     destroy() {
         const instance = this.component_instance;
+        instance.$emit('mount:destroy');
         instance.$destroy();
         instance.$el && instance.$el.parentNode.removeChild(instance.$el);
         this.component_instance = null;
@@ -200,7 +248,9 @@ class Mount {
         this._to_append_component = false;
         this._to_append_root = false;
         this._to_create_root = false;
+        this._is_destroyed = false;
         this._created_root_vue = null;
+        this._is_destroyed = true;
         return instance;
     }
 

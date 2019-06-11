@@ -19,6 +19,7 @@ A tool for dynamic mounting Vue components.
     - [rootOptions](#rootOptions)
     - [props](#props)
     - [data](#data)
+    - [on](#on)
 - [Methods](#Methods)
     - [getInstance(MountOption)](#getInstanceMountOption)
     - [mount(MountOption)](#mountMountOption)
@@ -79,6 +80,13 @@ const mountAlert = new Mount(Alert, {
     // modify component data
     data: {
         someInnerData: 'modified'
+    },
+    // attach event listeners
+    on: {
+        'some-event'(eventData, vm, mnt) {
+            // vm is a component instance
+            // mnt is current Mount instance
+        }
     }
 });
 
@@ -144,6 +152,38 @@ alertVm = mountAlert.mount();
 - **Type:** { Object }
 - **Details:** Modify component data.
 
+## **`on`**
+- **Type:** { [event: string]: Function | Object }
+- **Details:** Attach event listener to the component instance.
+    - **build-in** event:
+        - `mount:mount`: Triggered when calling `mount` method or ready to mount component。
+        - `mount:destroy`: Triggered when (underlying) calling `destroy` method.
+    - **Object configure**:
+        - `once` { Boolean }: Whether the listener will be removed once it triggers for the first time.
+        - `handler` { Function }: The event callback function. Compared to event callback function of Vue ([vm.$on/$once](https://vuejs.org/v2/api/index.html#vm-on)), the last two additional arguments are current `Vue component` and current `Mount instance`.
+- **Examples:**
+    ```js
+    mount(Alert, {
+        on: {
+            'mount:mount'(vm, mnt) {
+                console.log('mount:mount');
+                vm.doSomething();
+            },
+            'mount:destroy'() {
+                console.log('mount:destroy')
+            },
+            remove: {
+                once: true,
+                handler: (vm, mnt) => {
+                    console.log('remove');
+                }
+            },
+            'remove-with-data'(...args) {
+                console.log(args);
+            }
+        }
+    })
+    ```
 
 # Methods
 ## **`getInstance(MountOption)`**

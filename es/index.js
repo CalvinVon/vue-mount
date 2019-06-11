@@ -20,6 +20,8 @@ function parseOptions(options) {
       props = _ref$props === void 0 ? {} : _ref$props,
       _ref$data = _ref.data,
       data = _ref$data === void 0 ? {} : _ref$data,
+      _ref$on = _ref.on,
+      on = _ref$on === void 0 ? {} : _ref$on,
       _ref$target = _ref.target,
       target = _ref$target === void 0 ? 'new' : _ref$target,
       _ref$root = _ref.root,
@@ -37,6 +39,7 @@ function parseOptions(options) {
     targetElement: getElement(target),
     propsData: props,
     targetData: data,
+    targetEventListener: on,
     rootOptions: rootOptions
   };
 }
@@ -61,6 +64,8 @@ function () {
 
     _defineProperty(this, "_to_create_root", false);
 
+    _defineProperty(this, "_is_destroyed", false);
+
     _defineProperty(this, "_created_root_vue", void 0);
 
     this.component_options = component;
@@ -82,6 +87,7 @@ function () {
 
       var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
+      if (this._is_destroyed) return null;
 
       if (this.component_instance) {
         // Instance has been/is being destroyed
@@ -147,13 +153,55 @@ function () {
           }
         } else {
           throw new Error("[vue-mount] Can't mount to target with value [".concat(options.target, "]"));
-        }
+        } // Modify component data
+
 
       if (isType(options.targetData, 'Object')) {
         Object.assign(this.component_instance, options.targetData);
+      } // Attach component event listeners
+
+
+      if (isType(options.targetEventListener, 'Object')) {
+        Object.keys(options.targetEventListener).forEach(function (event) {
+          var value = options.targetEventListener[event];
+          var eventListener,
+              attachMethod = _this.component_instance.$on; // Parse event listener config
+
+          if (isType(value, 'Function')) {
+            eventListener = value;
+          } else if (isType(value, 'Object')) {
+            var handler = value.handler,
+                _value$once = value.once,
+                once = _value$once === void 0 ? false : _value$once;
+
+            if (once) {
+              attachMethod = _this.component_instance.$once;
+            }
+
+            eventListener = handler;
+          }
+
+          var callback = function callback() {
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            eventListener.apply(_this, [].concat(args, [_this.component_instance, _this]));
+          }; // Attach listener
+
+
+          attachMethod.call(_this.component_instance, event, callback);
+        });
       }
 
-      this.component_instance.__mount__ = this;
+      if (this._to_append_root) {
+        if (this._to_create_root) {
+          // Emit instance mount event
+          this.component_instance.$emit('mount:mount');
+        }
+      }
+
+      this.component_instance && (this.component_instance.__mount__ = this);
       return this.component_instance;
     }
     /**
@@ -168,7 +216,7 @@ function () {
       var instance = this.component_instance = this.getInstance(opt);
       var options = this.options; // Instance would not mount more than once
 
-      if (instance._isMounted) return instance; // Append to root vue instance
+      if (!instance || instance._isMounted) return instance; // Append to root vue instance
 
       if (this._to_append_root) {
         if (!this._to_create_root) {
@@ -185,6 +233,7 @@ function () {
 
           if (hostVm) {
             var _parent = hostVm.$parent;
+            hostVm.$emit('mount:destroy');
             hostVm.$destroy();
             instance.$parent = _parent;
             _parent && (_parent.$children = _toConsumableArray(new Set([].concat(_toConsumableArray(_parent.$children), [instance]))));
@@ -201,7 +250,9 @@ function () {
           instance.$mount(this.options.targetElement);
         }
 
-      instance.$el.__mount__ = this;
+      instance.$el.__mount__ = this; // Emit instance mount event
+
+      instance.$emit('mount:mount');
       return instance;
     }
     /**
@@ -212,13 +263,16 @@ function () {
     key: "destroy",
     value: function destroy() {
       var instance = this.component_instance;
+      instance.$emit('mount:destroy');
       instance.$destroy();
       instance.$el && instance.$el.parentNode.removeChild(instance.$el);
       this.component_instance = null;
       this._to_append_component = false;
       this._to_append_root = false;
       this._to_create_root = false;
+      this._is_destroyed = false;
       this._created_root_vue = null;
+      this._is_destroyed = true;
       return instance;
     }
   }, {
