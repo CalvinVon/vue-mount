@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Mount from '.';
+import Mount from './mount';
 
 function isOneOf(value) {
   for (var _len = arguments.length, opt = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {

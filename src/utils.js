@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Mount from '.';
+import Mount from './mount';
 
 function isOneOf(value, ...opt) {
     let options = opt;
