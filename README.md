@@ -137,7 +137,7 @@ alertVm = mountAlert.mount();
     });
     ```
 
-> Attention: When value of option `target` is `new`, or `root`, option `mode` will be ignored.
+> Attention: When the value of option `target` is `new`, or `root`, option `mode` will be ignored.
 
 
 ## **`root`**
@@ -208,7 +208,7 @@ alertVm = mountAlert.mount();
 - **Arguments:** { MountOption }
 - **Returns:** { Vue }
 - **Details:** Return an vue component instance, calling the method multiple times will returns the same instance
-> Attention: When option `target` is `new`, or `root` while no root instance/element was found, which would lead to creating a new Vue instance and the component would be mounted right now.
+> Attention: When the value of option `target` is `new`, or `root` while no root instance/element was found, which would lead to creating a new Vue instance and the component would be mounted right now.
 
 ## **`mount(MountOption)`**
 - **Arguments:** { MountOption }
