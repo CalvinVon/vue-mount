@@ -6,6 +6,10 @@ A tool for dynamic mounting Vue components.
 [![](https://img.shields.io/github/size/CalvinVon/vue-mount/dist/vue-mount.min.js.svg?label=minified%20size)](https://github.com/CalvinVon/vue-mount/blob/master/dist/vue-mount.min.js)
 [![dependencies](https://img.shields.io/david/CalvinVon/vue-mount.svg)](https://www.npmjs.com/package/vue-mount)
 
+## Demos
+- [preview](https://vue-mount-demo.stackblitz.io/)
+- [via NPM](https://stackblitz.com/edit/vue-mount-demo?file=alert.js)
+- [via CDN](https://jsbin.com/hehecut/1/edit?html,js,output)
 
 # Table of contents
 - [Getting Started](#Getting-Started)
