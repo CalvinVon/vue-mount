@@ -8,7 +8,7 @@ A tool for dynamic mounting Vue components.
 
 ## Demos
 - [preview](https://vue-mount-demo.stackblitz.io/)
-- [via NPM](https://stackblitz.com/edit/vue-mount-demo?file=alert.js)
+- [via NPM](https://stackblitz.com/edit/vue-mount-demo?file=App.js)
 - [via CDN](https://jsbin.com/hehecut/1/edit?html,js,output)
 
 # Table of contents
@@ -26,8 +26,9 @@ A tool for dynamic mounting Vue components.
     - [data](#data)
     - [on](#on)
 - [Methods](#Methods)
-    - [getInstance(MountOption)](#getInstanceMountOption)
-    - [mount(MountOption)](#mountMountOption)
+    - [getInstance(MountOptions)](#getInstanceMountOptions)
+    - [mount(MountOptions)](#mountMountOptions)
+    - [set(MountDataOptions)](#setMountDataOptions)
     - [destroy()](#destroy)
     - [getDom()](#getDom)
 
@@ -98,13 +99,15 @@ const mountAlert = new Mount(Alert, {
 // Get alert component instance
 let alertVm = mountAlert.getInstance();
 // Mount alert component
-alertVm = mountAlert.mount();
-
 // Component would not be mounted more than once
 alertVm = mountAlert.mount();
 
+// Dynamicly set props data of the component.
+mountAlert.set({
+    props: { content: 'Props changed' }
+});
 // Destroy component and it's element
-alertVm = mountAlert.destroy();
+mountAlert.destroy();
 
 // New component would be mounted
 alertVm = mountAlert.mount();
@@ -208,16 +211,21 @@ alertVm = mountAlert.mount();
     ```
 
 # Methods
-## **`getInstance(MountOption)`**
-- **Arguments:** { MountOption }
+## **`getInstance(MountOptions)`**
+- **Arguments:** { MountOptions }
 - **Returns:** { Vue }
-- **Details:** Return an vue component instance, calling the method multiple times will returns the same instance
+- **Details:** Return a vue component instance, calling the method multiple times will returns the same instance
 > Attention: When the value of option `target` is `new`, or `root` while no root instance/element was found, which would lead to creating a new Vue instance and the component would be mounted right now.
 
-## **`mount(MountOption)`**
-- **Arguments:** { MountOption }
+## **`mount(MountOptions)`**
+- **Arguments:** { MountOptions }
 - **Returns:** { Vue }
 - **Details:** Mount Vue component and return a Vue component instance, calling the method multiple times will **ONLY mount once**
+
+## **`set(MountDataOptions)`**
+- **Arguments:** { MountDataOptions }
+- **Returns:** { Mount } Current instance of `Mount`.
+- **Details:** Dynamicly set `props`, `data` and `listeners` of the component.
 
 ## **`destroy()`**
 - **Returns:** { Vue }

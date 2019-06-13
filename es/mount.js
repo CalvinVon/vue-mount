@@ -80,10 +80,10 @@ function () {
     this.component_constructor = Vue.extend(component);
   }
   /**
-   * Generate instance (only once)
+   * Generate a vue component instance
    * @description Only generate vue component instannce (or vue instance), and would do nothing with components tree
    * @param {MountOptions} opt mount options
-   * @returns {Vue}
+   * @returns {Vue} Vue instance
    */
 
 
@@ -168,38 +168,7 @@ function () {
       } // Attach component event listeners
 
 
-      if (isType(options.targetEventListener, 'Object')) {
-        Object.keys(options.targetEventListener).forEach(function (event) {
-          var value = options.targetEventListener[event];
-          var eventListener,
-              attachMethod = _this.component_instance.$on; // Parse event listener config
-
-          if (isType(value, 'Function')) {
-            eventListener = value;
-          } else if (isType(value, 'Object')) {
-            var handler = value.handler,
-                _value$once = value.once,
-                once = _value$once === void 0 ? false : _value$once;
-
-            if (once) {
-              attachMethod = _this.component_instance.$once;
-            }
-
-            eventListener = handler;
-          }
-
-          var callback = function callback() {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            eventListener.apply(_this, [].concat(args, [_this.component_instance, _this]));
-          }; // Attach listener
-
-
-          attachMethod.call(_this.component_instance, event, callback);
-        });
-      }
+      this._attachEventListeners(options.targetEventListener);
 
       if (this._to_append_root) {
         if (this._to_create_root) {
@@ -212,9 +181,11 @@ function () {
       return this.component_instance;
     }
     /**
-     * Mount component
+     * Mount Vue component and return a Vue component instance
      * @description Combine vue component instance with components tree
      * @param {Object} opt MountOptions
+     * 
+     * @returns {Vue} Vue instance
      */
 
   }, {
@@ -275,6 +246,44 @@ function () {
       return instance;
     }
     /**
+     * Set component `props`/`data` and `listeners`.
+     * @param {MountOptions} opt
+     * @returns {Mount}
+     */
+
+  }, {
+    key: "set",
+    value: function set(opt) {
+      var instance = this.component_instance = this.getInstance();
+
+      var _ref2 = opt || {},
+          _ref2$props = _ref2.props,
+          props = _ref2$props === void 0 ? {} : _ref2$props,
+          _ref2$data = _ref2.data,
+          data = _ref2$data === void 0 ? {} : _ref2$data,
+          _ref2$on = _ref2.on,
+          on = _ref2$on === void 0 ? {} : _ref2$on;
+
+      if (isType(data, 'Object')) {
+        Object.assign(instance, data);
+      }
+
+      var _props = instance.$props;
+
+      if (this._to_create_root) {
+        _props = this._created_root_vue;
+      }
+
+      if (isType(props, 'Object')) {
+        Object.assign(_props, props);
+      }
+
+      this._attachEventListeners(on);
+
+      return this;
+    }
+    /**
+     * Destroy the Vue component instance and remove the associated elements.
      * @returns {Vue}
      */
 
@@ -298,6 +307,44 @@ function () {
     key: "getDom",
     value: function getDom() {
       return this.component_instance && this.component_instance.$el;
+    }
+  }, {
+    key: "_attachEventListeners",
+    value: function _attachEventListeners(listeners) {
+      var _this2 = this;
+
+      if (isType(listeners, 'Object')) {
+        Object.keys(listeners).forEach(function (event) {
+          var value = listeners[event];
+          var eventListener,
+              attachMethod = _this2.component_instance.$on; // Parse event listener config
+
+          if (isType(value, 'Function')) {
+            eventListener = value;
+          } else if (isType(value, 'Object')) {
+            var handler = value.handler,
+                _value$once = value.once,
+                once = _value$once === void 0 ? false : _value$once;
+
+            if (once) {
+              attachMethod = _this2.component_instance.$once;
+            }
+
+            eventListener = handler;
+          }
+
+          var callback = function callback() {
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            eventListener.apply(_this2, [].concat(args, [_this2.component_instance, _this2]));
+          }; // Attach listener
+
+
+          attachMethod.call(_this2.component_instance, event, callback);
+        });
+      }
     }
   }]);
 

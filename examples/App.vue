@@ -13,6 +13,7 @@
 			<li><button @click="mountCmpRef">mountCmpRef</button> Mount component to specific mounted component and replace it</li>
 			<li><button @click="appendCmpRef">appendCmpRef</button> Mount component append to specific mounted component</li>
 			<li><button @click="mountWithListeners">with event listeners</button> Mount component with attached event listeners</li>
+			<li v-if="vm"><button @click="changeData">change props and data</button> Change props and data of the last component</li>
 		</ul>
 
 		<div id="target"
@@ -38,7 +39,7 @@
 
 <script>
 import Mount, { mount } from "../src";
-import Alert from "./alert/index";
+import Alert from "./alert";
 
 export default {
 	name: "app",
@@ -48,12 +49,13 @@ export default {
 	data() {
 		return {
 			uid: this._uid,
-			alert: "#target"
+			alert: "#target",
+			vm: null
 		};
 	},
 	methods: {
         mountCurrent() {
-            mount(Alert, {
+            this.vm = mount(Alert, {
                 target: this,
                 mode: 'append',
 				props: {
@@ -71,7 +73,7 @@ export default {
 			});
         },
 		mountNew() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				props: {
 					testProps: 123
 				},
@@ -87,7 +89,7 @@ export default {
 			});
 		},
 		mountRoot() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
                 target: "root",
 				props: {
 					testProps: 123
@@ -104,7 +106,7 @@ export default {
 			});
 		},
 		mountApp() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				target: "#app",
 				props: {
 					testProps: 123
@@ -121,7 +123,7 @@ export default {
 			});
 		},
 		mountRef() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				target: this.$refs.target,
 				props: {
 					testProps: 123
@@ -138,7 +140,7 @@ export default {
 			});
 		},
 		appendRef() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				target: this.$refs.target,
 				mode: "append",
 				props: {
@@ -156,7 +158,7 @@ export default {
 			});
 		},
 		mountCmpRef() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				target: this.$refs.alert,
 				props: {
 					testProps: 123
@@ -173,7 +175,7 @@ export default {
 			});
 		},
 		appendCmpRef() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				target: this.$refs.alert,
 				mode: "append",
 				props: {
@@ -191,7 +193,7 @@ export default {
 			});
 		},
 		mountWithListeners() {
-			mount(Alert, {
+			this.vm = mount(Alert, {
 				target: "root",
 				on: {
 					"mount:mount"(vm, mnt) {
@@ -213,6 +215,16 @@ export default {
 					"remove-with-event"(...args) {
 						console.log(args);
 					}
+				}
+			});
+		},
+		changeData() {
+			this.vm.__mount__.set({
+				props: {
+					testProps: '`testProps` has changed at ' + Date.now()
+				},
+				data: {
+					uid: '`uid` has changed'
 				}
 			});
 		}

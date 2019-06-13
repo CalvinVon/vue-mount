@@ -18,9 +18,7 @@ function getUuid() {
 
 export default {
     name: "alert",
-    props: {
-        testProps: Number
-    },
+    props: ['testProps'],
     data() {
         return {
             target: null,
@@ -32,6 +30,14 @@ export default {
                 }
             ],
         };
+    },
+    watch: {
+        testProps(newValue) {
+            console.log(newValue);
+        },
+        uid(newValue) {
+            console.log(newValue)
+        }
     },
     created() {
         this.$on("event", e => console.log("on event, ", e));
