@@ -1,14 +1,26 @@
 import Vue from 'vue';
-import { isOneOf, isType, isEmptyObject, isVueInstance, findParentVm, getElement } from './utils';
+import {
+    isOneOf,
+    isType,
+    isEmptyObject,
+    isVueInstance,
+    isRootVue,
+    findParentVm,
+    getElement
+} from './utils';
 
 /**
  * 
  * @param {MountOptions} options
  * @param {Object} options.props component props data
  * @param {Object} options.data component data
- * @param {Object} options.target component mount target. Options: `new`,`root` Default: `new`
- * @param {Object} options.root app root element
- * @param {Object} options.rootOptions app root instance options
+ * @param {string|Element|Vue|VNode} options.target component mount target.
+ *      - when string: Options: `new`,`root`. Default: `new`.
+ * @param {string} options.mode component mount mode.
+ *      - Options: `replace`,`append`. Default: `replace`.
+ *      - disabled when target is `new` or `root`.
+ * @param {string|Element|Vue|VNode} options.root app root element
+ * @param {VueOptions} options.rootOptions app root instance options
  */
 function parseOptions(options) {
     const {
@@ -16,6 +28,7 @@ function parseOptions(options) {
         data = {},
         on = {},
         target = 'new',
+        mode = 'replace',
         root = '#app',
         rootOptions = {}
     } = options || {};
@@ -28,6 +41,7 @@ function parseOptions(options) {
         rootVm,
         target,
         targetElement: getElement(target),
+        mode,
         propsData: props,
         targetData: data,
         targetEventListener: on,
@@ -212,23 +226,42 @@ class Mount {
 
         // Append to vue component instance
         else {
-            let hostVm = isVueInstance(this.options.targetElement);
+            let hostVm = isVueInstance(options.targetElement),
+                parentVm;
+
+            if (isRootVue(hostVm)) hostVm = hostVm.$children[0];
+
             if (hostVm) {
-                const _parent = hostVm.$parent;
-                hostVm.$emit('mount:destroy');
-                hostVm.$destroy();
-                instance.$parent = _parent;
-                _parent && (_parent.$children = [...new Set([..._parent.$children, instance])]);
+                // Whether replace host vm
+                if (options.mode === 'append') {
+                    parentVm = hostVm;
+                }
+                else {
+                    const _parent = hostVm.$parent;
+                    hostVm.$emit('mount:destroy');
+                    hostVm.$destroy();
+                    instance.$parent = _parent;
+                    _parent && (_parent.$children = [...new Set([..._parent.$children, instance])]);
+                }
             }
 
-            const parentVm = findParentVm(this.options.targetElement);
-            if (parentVm) {
+            if (parentVm || (parentVm = findParentVm(options.targetElement))) {
                 parentVm.$children = [...new Set([...parentVm.$children, instance])];
                 instance.$parent = parentVm;
                 instance.$root = parentVm.$root;
             }
-            instance.$mount(this.options.targetElement);
+
+            if (options.mode === 'append') {
+                // Append mount
+                instance.$mount();
+                options.targetElement.appendChild(instance.$el);
+            }
+            else {
+                // Replace Mount
+                instance.$mount(options.targetElement);
+            }
         }
+
         instance.$el.__mount__ = this;
         // Emit instance mount event
         instance.$emit('mount:mount');

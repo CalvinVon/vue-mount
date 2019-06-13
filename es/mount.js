@@ -3,15 +3,19 @@ import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
 import _createClass from "@babel/runtime/helpers/createClass";
 import _defineProperty from "@babel/runtime/helpers/defineProperty";
 import Vue from 'vue';
-import { isOneOf, isType, isEmptyObject, isVueInstance, findParentVm, getElement } from './utils';
+import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement } from './utils';
 /**
  * 
  * @param {MountOptions} options
  * @param {Object} options.props component props data
  * @param {Object} options.data component data
- * @param {Object} options.target component mount target. Options: `new`,`root` Default: `new`
- * @param {Object} options.root app root element
- * @param {Object} options.rootOptions app root instance options
+ * @param {string|Element|Vue|VNode} options.target component mount target.
+ *      - when string: Options: `new`,`root`. Default: `new`.
+ * @param {string} options.mode component mount mode.
+ *      - Options: `replace`,`append`. Default: `replace`.
+ *      - disabled when target is `new` or `root`.
+ * @param {string|Element|Vue|VNode} options.root app root element
+ * @param {VueOptions} options.rootOptions app root instance options
  */
 
 function parseOptions(options) {
@@ -24,6 +28,8 @@ function parseOptions(options) {
       on = _ref$on === void 0 ? {} : _ref$on,
       _ref$target = _ref.target,
       target = _ref$target === void 0 ? 'new' : _ref$target,
+      _ref$mode = _ref.mode,
+      mode = _ref$mode === void 0 ? 'replace' : _ref$mode,
       _ref$root = _ref.root,
       root = _ref$root === void 0 ? '#app' : _ref$root,
       _ref$rootOptions = _ref.rootOptions,
@@ -37,6 +43,7 @@ function parseOptions(options) {
     rootVm: rootVm,
     target: target,
     targetElement: getElement(target),
+    mode: mode,
     propsData: props,
     targetData: data,
     targetEventListener: on,
@@ -229,25 +236,37 @@ function () {
         }
       } // Append to vue component instance
       else {
-          var hostVm = isVueInstance(this.options.targetElement);
+          var hostVm = isVueInstance(options.targetElement),
+              parentVm;
+          if (isRootVue(hostVm)) hostVm = hostVm.$children[0];
 
           if (hostVm) {
-            var _parent = hostVm.$parent;
-            hostVm.$emit('mount:destroy');
-            hostVm.$destroy();
-            instance.$parent = _parent;
-            _parent && (_parent.$children = _toConsumableArray(new Set([].concat(_toConsumableArray(_parent.$children), [instance]))));
+            // Whether replace host vm
+            if (options.mode === 'append') {
+              parentVm = hostVm;
+            } else {
+              var _parent = hostVm.$parent;
+              hostVm.$emit('mount:destroy');
+              hostVm.$destroy();
+              instance.$parent = _parent;
+              _parent && (_parent.$children = _toConsumableArray(new Set([].concat(_toConsumableArray(_parent.$children), [instance]))));
+            }
           }
 
-          var parentVm = findParentVm(this.options.targetElement);
-
-          if (parentVm) {
+          if (parentVm || (parentVm = findParentVm(options.targetElement))) {
             parentVm.$children = _toConsumableArray(new Set([].concat(_toConsumableArray(parentVm.$children), [instance])));
             instance.$parent = parentVm;
             instance.$root = parentVm.$root;
           }
 
-          instance.$mount(this.options.targetElement);
+          if (options.mode === 'append') {
+            // Append mount
+            instance.$mount();
+            options.targetElement.appendChild(instance.$el);
+          } else {
+            // Replace Mount
+            instance.$mount(options.targetElement);
+          }
         }
 
       instance.$el.__mount__ = this; // Emit instance mount event

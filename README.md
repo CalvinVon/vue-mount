@@ -15,6 +15,7 @@ A tool for dynamic mounting Vue components.
     - [Advanced usage](#Advanced-usage)
 - [MountOption](#MountOption)
     - [target](#target)
+    - [mode](#mode)
     - [root](#root)
     - [rootOptions](#rootOptions)
     - [props](#props)
@@ -121,6 +122,23 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component };
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
+
+## **`mode`**
+- **Type:** { string }
+- **Default:** `replace`
+- **Options:** `replace`, `append`
+- **Details:** Specific the mount mode.
+- **Examples:**
+    ```js
+    // Alert component would be append to current component
+    mount(Alert, { 
+        target: this,
+        mode: 'append'
+    });
+    ```
+
+> Attention: When value of option `target` is `new`, or `root`, option `mode` will be ignored.
+
 
 ## **`root`**
 - **Type:** { string | **Element** | **Vue** | **VNode** }
