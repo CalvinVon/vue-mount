@@ -1,5 +1,5 @@
 # vue-mount
-A tool for dynamic mounting Vue components.
+A wonderful tool for dynamic mounting Vue components.
 
 [![version](https://img.shields.io/npm/v/vue-mount.svg)](https://www.npmjs.com/package/vue-mount)
 [![](https://img.shields.io/npm/dt/vue-mount.svg)](https://github.com/CalvinVon/vue-mount)
