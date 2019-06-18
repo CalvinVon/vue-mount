@@ -3,9 +3,9 @@ import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
 import _createClass from "@babel/runtime/helpers/createClass";
 import _defineProperty from "@babel/runtime/helpers/defineProperty";
 import Vue from 'vue';
-import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement } from './utils';
+import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement, checkAndRmUnmountedVm } from './utils';
 /**
- * 
+ * Parse options
  * @param {MountOptions} options
  * @param {Object} options.props component props data
  * @param {Object} options.data component data
@@ -108,8 +108,13 @@ function () {
 
 
       if (options.targetElement) {
-        this._to_append_component = true;
-        this.component_instance = new this.component_constructor(options);
+        if (!isVueInstance(options.targetElement) && !findParentVm(options.targetElement)) {
+          this._to_append_root = true;
+          this._to_create_root = true;
+        } else {
+          this._to_append_component = true;
+          this.component_instance = new this.component_constructor(options);
+        }
       } // Would mount append to root
       else if (isOneOf(options.target, 'root', 'new')) {
           this._to_append_root = true;
@@ -122,45 +127,52 @@ function () {
             }
           } else {
             this._to_create_root = true;
-            var rootOptions = {
-              data: options.propsData,
-              render: function render(h) {
-                var component = _this.component_options;
-                return h(component, {
-                  props: options.propsData
-                });
-              }
-            };
-
-            if (isType(options.rootOptions, 'Object')) {
-              Object.assign(rootOptions, options.rootOptions);
-            }
-
-            var rootVue = new Vue(rootOptions);
-
-            if (options.rootEl) {
-              if (options.rootVm) {
-                rootVue.$mount();
-
-                if (options.target === 'new') {
-                  document.body.appendChild(rootVue.$el);
-                } else {
-                  options.rootEl.appendChild(rootVue.$el);
-                }
-              } else {
-                rootVue.$mount(options.rootEl);
-              }
-            } else {
-              rootVue.$mount();
-              document.body.appendChild(rootVue.$el);
-            }
-
-            this._created_root_vue = rootVue;
-            this.component_instance = rootVue.$children[0];
           }
         } else {
           throw new Error("[vue-mount] Can't mount to target with value [".concat(options.target, "]"));
-        } // Modify component data
+        }
+
+      if (this._to_append_root) {
+        if (this._to_create_root) {
+          var rootOptions = {
+            data: options.propsData,
+            render: function render(h) {
+              var component = _this.component_options;
+              return h(component, {
+                props: options.propsData
+              });
+            }
+          };
+
+          if (isType(options.rootOptions, 'Object')) {
+            Object.assign(rootOptions, options.rootOptions);
+          }
+
+          var rootVue = new Vue(rootOptions);
+
+          if (isOneOf(options.target, 'new', 'root') && options.rootEl) {
+            if (options.rootVm) {
+              rootVue.$mount();
+
+              if (options.target === 'new') {
+                document.body.appendChild(rootVue.$el);
+              } else {
+                options.rootEl.appendChild(rootVue.$el);
+              }
+            } else {
+              rootVue.$mount(options.rootEl);
+            }
+          } else {
+            rootVue.$mount();
+            document.body.appendChild(rootVue.$el);
+          }
+
+          this._created_root_vue = rootVue;
+          this.component_instance = rootVue.$children[0]; // Emit instance mount event
+
+          this.component_instance.$emit('mount:mount');
+        }
+      } // Modify component data
 
 
       if (isType(options.targetData, 'Object')) {
@@ -169,13 +181,6 @@ function () {
 
 
       this._attachEventListeners(options.targetEventListener);
-
-      if (this._to_append_root) {
-        if (this._to_create_root) {
-          // Emit instance mount event
-          this.component_instance.$emit('mount:mount');
-        }
-      }
 
       this.component_instance && (this.component_instance.__mount__ = this);
       return this.component_instance;
@@ -198,6 +203,7 @@ function () {
 
       if (this._to_append_root) {
         if (!this._to_create_root) {
+          checkAndRmUnmountedVm(options.rootVm);
           instance.$root = options.rootVm;
           instance.$parent = options.rootVm;
           options.rootVm.$children = _toConsumableArray(new Set([].concat(_toConsumableArray(options.rootVm.$children), [instance])));
@@ -208,7 +214,7 @@ function () {
       } // Append to vue component instance
       else {
           var hostVm = isVueInstance(options.targetElement),
-              parentVm;
+              parentVm = findParentVm(options.targetElement);
           if (isRootVue(hostVm)) hostVm = hostVm.$children[0];
 
           if (hostVm) {
@@ -224,7 +230,7 @@ function () {
             }
           }
 
-          if (parentVm || (parentVm = findParentVm(options.targetElement))) {
+          if (parentVm) {
             parentVm.$children = _toConsumableArray(new Set([].concat(_toConsumableArray(parentVm.$children), [instance])));
             instance.$parent = parentVm;
             instance.$root = parentVm.$root;
@@ -237,6 +243,7 @@ function () {
           } else {
             // Replace Mount
             instance.$mount(options.targetElement);
+            checkAndRmUnmountedVm(parentVm);
           }
         }
 

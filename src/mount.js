@@ -6,11 +6,12 @@ import {
     isVueInstance,
     isRootVue,
     findParentVm,
-    getElement
+    getElement,
+    checkAndRmUnmountedVm
 } from './utils';
 
 /**
- * 
+ * Parse options
  * @param {MountOptions} options
  * @param {Object} options.props component props data
  * @param {Object} options.data component data
@@ -92,9 +93,14 @@ class Mount {
 
         // Has specific target element
         if (options.targetElement) {
-            this._to_append_component = true;
-
-            this.component_instance = new this.component_constructor(options);
+            if (!isVueInstance(options.targetElement) && !findParentVm(options.targetElement)) {
+                this._to_append_root = true;
+                this._to_create_root = true;
+            }
+            else {
+                this._to_append_component = true;
+                this.component_instance = new this.component_constructor(options);
+            }
         }
 
         // Would mount append to root
@@ -109,7 +115,14 @@ class Mount {
             }
             else {
                 this._to_create_root = true;
+            }
+        }
+        else {
+            throw new Error(`[vue-mount] Can't mount to target with value [${options.target}]`);
+        }
 
+        if (this._to_append_root) {
+            if (this._to_create_root) {
                 const rootOptions = {
                     data: options.propsData,
                     render: h => {
@@ -124,7 +137,7 @@ class Mount {
                     Object.assign(rootOptions, options.rootOptions);
                 }
                 const rootVue = new Vue(rootOptions);
-                if (options.rootEl) {
+                if (isOneOf(options.target, 'new', 'root') && options.rootEl) {
                     if (options.rootVm) {
                         rootVue.$mount();
                         if (options.target === 'new') {
@@ -145,10 +158,9 @@ class Mount {
 
                 this._created_root_vue = rootVue;
                 this.component_instance = rootVue.$children[0];
+                // Emit instance mount event
+                this.component_instance.$emit('mount:mount');
             }
-        }
-        else {
-            throw new Error(`[vue-mount] Can't mount to target with value [${options.target}]`);
         }
 
         // Modify component data
@@ -156,16 +168,8 @@ class Mount {
             Object.assign(this.component_instance, options.targetData);
         }
 
-
         // Attach component event listeners
         this._attachEventListeners(options.targetEventListener);
-
-        if (this._to_append_root) {
-            if (this._to_create_root) {
-                // Emit instance mount event
-                this.component_instance.$emit('mount:mount');
-            }
-        }
 
         this.component_instance && (this.component_instance.__mount__ = this);
         return this.component_instance;
@@ -189,6 +193,7 @@ class Mount {
         // Append to root vue instance
         if (this._to_append_root) {
             if (!this._to_create_root) {
+                checkAndRmUnmountedVm(options.rootVm);
                 instance.$root = options.rootVm;
                 instance.$parent = options.rootVm;
                 options.rootVm.$children = [...new Set([...options.rootVm.$children, instance])];
@@ -203,7 +208,7 @@ class Mount {
         // Append to vue component instance
         else {
             let hostVm = isVueInstance(options.targetElement),
-                parentVm;
+                parentVm = findParentVm(options.targetElement);
 
             if (isRootVue(hostVm)) hostVm = hostVm.$children[0];
 
@@ -221,7 +226,7 @@ class Mount {
                 }
             }
 
-            if (parentVm || (parentVm = findParentVm(options.targetElement))) {
+            if (parentVm) {
                 parentVm.$children = [...new Set([...parentVm.$children, instance])];
                 instance.$parent = parentVm;
                 instance.$root = parentVm.$root;
@@ -235,6 +240,7 @@ class Mount {
             else {
                 // Replace Mount
                 instance.$mount(options.targetElement);
+                checkAndRmUnmountedVm(parentVm);
             }
         }
 

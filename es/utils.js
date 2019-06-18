@@ -94,4 +94,25 @@ function findParentVm(el) {
   }
 }
 
-export { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, isMountInstance, getElement, findParentVm };
+function contains(a, b) {
+  return a.contains ? a != b && a.contains(b) : !!(a.compareDocumentPosition(arg) & 16);
+} // Check child component and if the element attached is removed, destroy them
+
+
+function checkAndRmUnmountedVm(vm) {
+  if (!vm) return;
+  var hostEl = vm.$el;
+  vm.$children = vm.$children.filter(function (childVm) {
+    var childEl = childVm.$el;
+
+    if (!contains(hostEl, childEl)) {
+      childVm.$emit('mount:destroy');
+      childVm.$destroy();
+      return false;
+    } else {
+      return true;
+    }
+  });
+}
+
+export { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, isMountInstance, getElement, findParentVm, checkAndRmUnmountedVm };

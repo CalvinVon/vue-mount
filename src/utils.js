@@ -84,6 +84,26 @@ function findParentVm(el) {
     }
 }
 
+function contains(a, b) {
+    return a.contains ? a != b && a.contains(b) : !!(a.compareDocumentPosition(arg) & 16);
+}
+
+// Check child component and if the element attached is removed, destroy them
+function checkAndRmUnmountedVm(vm) {
+    if (!vm) return;
+    const hostEl = vm.$el;
+    vm.$children = vm.$children.filter(childVm => {
+        const childEl = childVm.$el;
+        if (!contains(hostEl, childEl)) {
+            childVm.$emit('mount:destroy');
+            childVm.$destroy();
+            return false;
+        }
+        else {
+            return true;
+        }
+    });
+}
 
 export {
     isOneOf,
@@ -93,5 +113,6 @@ export {
     isRootVue,
     isMountInstance,
     getElement,
-    findParentVm
+    findParentVm,
+    checkAndRmUnmountedVm
 }

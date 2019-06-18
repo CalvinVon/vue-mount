@@ -1,5 +1,6 @@
-const path = require('path')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const path = require('path');
+const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     mode: 'production',
@@ -14,7 +15,7 @@ module.exports = {
         filename: '[name].min.js',
         libraryTarget: 'umd',
         library: 'VueMount',
-        // globalObject: 'typeof self !== \'undefined\' ? self : this',
+        globalObject: 'typeof self !== \'undefined\' ? self : this',
     },
     module: {
         rules: [{
@@ -24,6 +25,9 @@ module.exports = {
         }]
     },
     plugins: [
+        new webpack.BannerPlugin({
+            banner: `Vue-Mount.js v${require('./package.json').version}\n(c) ${new Date().getFullYear()} Calvin Von\nReleased under the MIT License.`
+        }),
         new UglifyJsPlugin({
             uglifyOptions: {
                 compress: {
