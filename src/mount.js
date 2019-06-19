@@ -171,7 +171,12 @@ class Mount {
         // Attach component event listeners
         this._attachEventListeners(options.targetEventListener);
 
-        this.component_instance && (this.component_instance.__mount__ = this);
+        if (this.component_instance) {
+            this.component_instance.__mount__ = this;
+            this.component_instance.$getMount = () => this;
+        }
+
+
         return this.component_instance;
     }
 
