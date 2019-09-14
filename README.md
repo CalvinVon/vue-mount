@@ -11,7 +11,7 @@ A tool for dynamic mounting Vue components and maintaining the component tree.
 ## Demos
 - [preview](https://vue-mount-demo.stackblitz.io/)
 - [via NPM](https://stackblitz.com/edit/vue-mount-demo?file=App.js)
-- [via CDN](https://jsbin.com/hehecut/1/edit?html,js,output)
+- [via CDN](https://jsbin.com/hojadorago/1/edit?html,js,output)
 
 # Table of contents
 - [Getting Started](#Getting-Started)
