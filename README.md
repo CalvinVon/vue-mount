@@ -1,10 +1,12 @@
 # vue-mount
-A tool for dynamic mounting Vue components.
+A tool for dynamic mounting Vue components and maintaining the component tree.
 
 [![version](https://img.shields.io/npm/v/vue-mount.svg)](https://www.npmjs.com/package/vue-mount)
 [![](https://img.shields.io/npm/dt/vue-mount.svg)](https://github.com/CalvinVon/vue-mount)
 [![](https://img.shields.io/github/size/CalvinVon/vue-mount/dist/vue-mount.min.js.svg?label=minified%20size)](https://github.com/CalvinVon/vue-mount/blob/master/dist/vue-mount.min.js)
 [![dependencies](https://img.shields.io/david/CalvinVon/vue-mount.svg)](https://www.npmjs.com/package/vue-mount)
+
+[中文文档](README_zh.md) | English
 
 ## Demos
 - [preview](https://vue-mount-demo.stackblitz.io/)
@@ -61,7 +63,7 @@ or via CDN
 ### Basic usage
 ```js
 import { mount } from "vue-mount";
-// 
+// just import a single file component
 import Alert from "./alert.vue";
 
 // mount component and return instance
@@ -134,7 +136,7 @@ alertVm = mountAlert.mount();
 - **Type:** { string }
 - **Default:** `replace`
 - **Options:** `replace`, `append`
-- **Details:** Specific the mount mode.
+- **Details:** Specific the mount mode. Corresponds to the behavior on its component tree.
 - **Examples:**
     ```js
     // Alert component would be append to current component
@@ -144,7 +146,7 @@ alertVm = mountAlert.mount();
     });
     ```
 
-> Attention: When the value of option `target` is `new`, or `root`, option `mode` will be ignored.
+> **Attention**: When the value of option `target` is `new`, or `root`, option `mode` will be ignored and be reset to `append`.
 
 
 ## **`root`**
@@ -175,7 +177,7 @@ alertVm = mountAlert.mount();
 
 ## **`data`**
 - **Type:** { Object }
-- **Details:** Modify component data.
+- **Details:** Modify component data after the component instance was created (mounted is not necessary).
 
 ## **`on`**
 - **Type:** { [event: string]: Function | Object }
@@ -186,6 +188,8 @@ alertVm = mountAlert.mount();
     - **Object configure**:
         - `once` { Boolean }: Whether the listener will be removed once it triggers for the first time.
         - `handler` { Function }: The event callback function. Compared to event callback function of Vue ([vm.$on/$once](https://vuejs.org/v2/api/index.html#vm-on)), the last two additional arguments are current `Vue component` and current `Mount instance`.
+
+        > The `this` argument of the callback function points to the current **Mount instance**, although you can use the **arrow function** to avoid this behavior.
 - **Examples:**
     ```js
     mount(Alert, {
@@ -215,12 +219,14 @@ alertVm = mountAlert.mount();
 - **Arguments:** { MountOptions }
 - **Returns:** { Vue }
 - **Details:** Return a vue component instance, calling the method multiple times will returns the same instance
-> Attention: When the value of option `target` is `new`, or `root` while no root instance/element was found, which would lead to creating a new Vue instance and the component would be mounted right now.
+> **Attention**: When the value of option `target` is `root` while no root instance/element was found(which means need to create a new Vue instance), or `target` is `new`, they all lead to the result that instance would be mounted right now.
+
+> In order to ensure behavioral consistency, it is recommended to use the [`#mount`](#mountMountOptions) method first.
 
 ## **`mount(MountOptions)`**
 - **Arguments:** { MountOptions }
 - **Returns:** { Vue }
-- **Details:** Mount Vue component and return a Vue component instance, calling the method multiple times will **ONLY mount once**
+- **Details:** Mount Vue component, update the component tree and return a Vue component instance, calling the method multiple times will **ONLY mount once**
 
 ## **`set(MountDataOptions)`**
 - **Arguments:** { MountDataOptions }
@@ -229,7 +235,8 @@ alertVm = mountAlert.mount();
 
 ## **`destroy()`**
 - **Returns:** { Vue }
-- **Details:** Destroy the Vue component instance and remove the associated elements.
+- **Details:** Destroy the Vue component instance and remove the associated elements. Diff from Vue's [$destroy](https://cn.vuejs.org/v2/api/#vm-destroy) method.
+
 
 ## **`getDom()`**
 - **Returns:** { Element | Node }
