@@ -158,8 +158,6 @@ class Mount {
 
                 this._created_root_vue = rootVue;
                 this.component_instance = rootVue.$children[0];
-                // Emit instance mount event
-                this.component_instance.$emit('mount:mount');
             }
         }
 
@@ -170,6 +168,11 @@ class Mount {
 
         // Attach component event listeners
         this._attachEventListeners(options.targetEventListener);
+
+        if (this._to_append_root && this._to_create_root) {
+            // Emit instance mount event
+            this.component_instance.$emit('mount:mount');
+        }
 
         if (this.component_instance) {
             this.component_instance.__mount__ = this;
