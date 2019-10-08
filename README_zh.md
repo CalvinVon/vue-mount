@@ -19,7 +19,7 @@ vue-mount —— 一个动态加载 Vue 组件并维护组件树的工具库。
 - [用法](#用法)
     - [基本用法](#基本用法)
     - [高级用法](#高级用法)
-- [Mount配置项](#Mount配置项)
+- [MountOption 配置项](#MountOption-配置项)
     - [target](#target)
     - [mode](#mode)
     - [root](#root)
@@ -119,14 +119,14 @@ mountAlert.destroy();
 alertVm = mountAlert.mount();
 ```
 
-# Mount配置项
+# MountOption 配置项
 ## **`target`**
 - **类型:** { string | **Element** | **Vue** | **VNode** }
 - **默认值:** `new`
 - **说明:** 你可以传入 `css selector`, `Element`, `Vue instance`, `VNode` 或者是包括 `new` 和 `root` 的特殊预设值。
     - **`new`:** 默认特殊预设值. Vue 组件实例会被挂载到一个**新创建的 Vue 根实例**上。
     - **`root`:** Vue 组件实例将被挂载到**现有的 Vue 根实例**上。 *如果在 `MountOption.root` 选项下找不到根实例或根元素，组件实例将被挂载到一个新的 Vue 根实例上，其行为将与选项 `new` 相似*。
-    - 当传入一个 `Vue 实例对象`时，新的组件实例将会**替换**传入的实例，并且在 Vue 组件树上更新。 当新的组件实例挂载时，传入的实例将会被销毁。
+    - 当传入一个 `Vue 实例对象` 时，新的组件实例将会**替换/追加到**传入的实例（具体参见 [`MountOption.mode`](#mode) 配置），并且在 Vue 组件树上更新。 当新的组件实例挂载时，传入的实例将会被销毁。
 - **用例:**
     ```js
     mount(Alert, { target: "root" };
@@ -135,6 +135,9 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component };
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
+    
+> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到形如 `Vue.prototype.$xxx` 或创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例）；其他情况下，`vue-mount` 会自动查询并加入组件树上下文。
+
 
 ## **`mode`**
 - **类型:** { string }

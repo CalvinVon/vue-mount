@@ -122,7 +122,7 @@ alertVm = mountAlert.mount();
 - **Details:** You can pass `css selector`, `Element`, `Vue instance`, `VNode` or special value including `new` and `root`
     - **`new`:** default value. Vue component would be mounted with a new Vue root instance.
     - **`root`:** Vue component would be mounted to an existing Vue root instance. if the root instance or root element is not found under `MountOption.root` option, the component would be mounted with a new Vue root instance behaving just like option `new`.
-    - When giving a `Vue instance`, the component would replace the Vue instance and added to the components tree, former Vue instance would be destroyed when the component is mounted.
+    - When giving a `Vue instance`, the component would **replace/append** the Vue instance and added to the components tree(see [MountOption.mode](#mode)), former Vue instance would be destroyed when the component is mounted.
 - **Examples:**
     ```js
     mount(Alert, { target: "root" };
@@ -131,6 +131,8 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component };
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
+
+> **Special Note**: When configured as `new`, the mounted component cannot access the configuration passed in the form of `Vue.prototype.$xxx` or when creating the root instance, resulting in the mounted component UNABLE to access configuration globally registered on the root component such as `this.$router` (because a new root instance was created); In other cases, `vue-mount` will automatically query and join the component tree context.
 
 ## **`mode`**
 - **Type:** { string }
