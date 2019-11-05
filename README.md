@@ -34,6 +34,8 @@ A tool for dynamic mounting Vue components and maintaining the component tree.
     - [destroy()](#destroy)
     - [getDom()](#getDom)
 
+---
+
 # Getting Started
 ### Install
 You can install the library via npm.
@@ -58,6 +60,7 @@ or via CDN
 </script>
 ```
 
+---
 
 # Usage
 ### Basic usage
@@ -114,6 +117,9 @@ mountAlert.destroy();
 // New component would be mounted
 alertVm = mountAlert.mount();
 ```
+
+---
+
 
 # MountOption
 ## **`target`**
@@ -228,7 +234,10 @@ alertVm = mountAlert.mount();
 ## **`mount(MountOptions)`**
 - **Arguments:** { MountOptions }
 - **Returns:** { Vue }
-- **Details:** Mount Vue component, update the component tree and return a Vue component instance, calling the method multiple times will **ONLY mount once**
+- **Details:** Mount Vue component, update the component tree and return a Vue component instance.
+> Calling the method after the component was destroyed will **re-mount** the component.
+
+> Calling the method multiple times will **ONLY mount once**
 
 ## **`set(MountDataOptions)`**
 - **Arguments:** { MountDataOptions }
@@ -243,3 +252,13 @@ alertVm = mountAlert.mount();
 ## **`getDom()`**
 - **Returns:** { Element | Node }
 - **Details:** Returns the element associated with the component.
+
+---
+
+# Methods added on components
+## **`$getMount()`**
+- **Returns:** { VueMount }
+- **Details:** returns the VueMount instance associated with the component instance.
+
+---
+# [CHANGELOG](./CHANGELOG.md)

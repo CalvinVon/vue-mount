@@ -33,6 +33,9 @@ vue-mount —— 一个动态加载 Vue 组件并维护组件树的工具库。
     - [set(MountDataOptions)](#setMountDataOptions)
     - [destroy()](#destroy)
     - [getDom()](#getDom)
+- [在组件上添加的方法](#在组件上添加的方法)
+    - [$getMount()](#getMount)
+- [CHANGELOG](#CHANGELOG)
 
 # 开始
 ### 安装
@@ -118,6 +121,8 @@ mountAlert.destroy();
 // 销毁之后新的组件实例会被重新挂载
 alertVm = mountAlert.mount();
 ```
+
+---
 
 # MountOption 配置项
 ## **`target`**
@@ -221,6 +226,10 @@ alertVm = mountAlert.mount();
     })
     ```
 
+
+---
+
+
 # 实例方法
 ## **`getInstance(MountOptions)`**
 - **参数:** { MountOptions }
@@ -233,7 +242,10 @@ alertVm = mountAlert.mount();
 ## **`mount(MountOptions)`**
 - **参数:** { MountOptions }
 - **返回:** { Vue }
-- **说明:** 挂载 Vue 组件、更新组件树并返回 Vue 组件实例，多次调用该方法只会挂载实例一次，且将返回相同的实例。
+- **说明:** 挂载 Vue 组件、更新组件树并返回 Vue 组件实例。
+> 若在组件已被 `destroy` 之后再次调用该方法将重新装载该组件（你可以认为 mount 实例为组件工厂）。
+
+> 多次调用该方法只会挂载实例一次，且将返回相同的实例。
 
 
 ## **`set(MountDataOptions)`**
@@ -248,3 +260,14 @@ alertVm = mountAlert.mount();
 ## **`getDom()`**
 - **返回:** { Element | Node }
 - **说明:** 返回组件实例相关联的 DOM。
+
+
+---
+
+# 在组件上添加的方法
+## **`$getMount()`**
+- **返回:** { VueMount }
+- **说明:** 返回组件实例相关联的 VueMount 实例。
+
+---
+# [CHANGELOG](./CHANGELOG.md)
