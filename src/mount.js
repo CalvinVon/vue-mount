@@ -78,8 +78,6 @@ class Mount {
     getInstance(opt = {}) {
         const options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
 
-        if (this._is_destroyed) return null;
-
         if (this.component_instance) {
             // Instance has been/is being destroyed
             if (this.component_instance._isDestroyed || this.component_instance._isBeingDestroyed) {
@@ -179,7 +177,7 @@ class Mount {
             this.component_instance.$getMount = () => this;
         }
 
-
+        this._is_destroyed = false;
         return this.component_instance;
     }
 
@@ -196,7 +194,7 @@ class Mount {
         const options = this.options;
 
         // Instance would not mount more than once
-        if (!instance || instance._isMounted) return instance;
+        if (instance._isMounted) return instance;
 
         // Append to root vue instance
         if (this._to_append_root) {
@@ -299,7 +297,6 @@ class Mount {
         this._to_append_component = false;
         this._to_append_root = false;
         this._to_create_root = false;
-        this._is_destroyed = false;
         this._created_root_vue = null;
         this._is_destroyed = true;
         return instance;
