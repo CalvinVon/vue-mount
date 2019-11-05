@@ -94,7 +94,6 @@ function () {
 
       var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
-      if (this._is_destroyed) return null;
 
       if (this.component_instance) {
         // Instance has been/is being destroyed
@@ -193,6 +192,7 @@ function () {
         };
       }
 
+      this._is_destroyed = false;
       return this.component_instance;
     }
     /**
@@ -209,7 +209,7 @@ function () {
       var instance = this.component_instance = this.getInstance(opt);
       var options = this.options; // Instance would not mount more than once
 
-      if (!instance || instance._isMounted) return instance; // Append to root vue instance
+      if (instance._isMounted) return instance; // Append to root vue instance
 
       if (this._to_append_root) {
         if (!this._to_create_root) {
@@ -315,7 +315,6 @@ function () {
       this._to_append_component = false;
       this._to_append_root = false;
       this._to_create_root = false;
-      this._is_destroyed = false;
       this._created_root_vue = null;
       this._is_destroyed = true;
       return instance;
