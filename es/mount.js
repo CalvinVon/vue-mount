@@ -65,12 +65,8 @@ function applyTargetWithData(mountInstance, data) {
 function applyTargetWithWatch(mountInstance, watchOptions) {
   function rewriteHandler(handler) {
     var originHandler = handler || new Function();
-    return function handlerWrapper() {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      originHandler.apply(mountInstance, [].concat(args, [instance, mountInstance]));
+    return function handlerWrapper(newValue, oldValue) {
+      originHandler.apply(mountInstance, [newValue, oldValue, instance, mountInstance]);
     };
   }
 
@@ -395,8 +391,8 @@ function () {
           }
 
           var callback = function callback() {
-            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-              args[_key2] = arguments[_key2];
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
             }
 
             eventListener.apply(_this2, [].concat(args, [_this2.component_instance, _this2]));

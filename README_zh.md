@@ -102,6 +102,19 @@ const mountAlert = new Mount(Alert, {
             // vm 是当前挂载的组件实例
             // mnt（mount的缩写）是当前创建挂载组件的 vue-mount 实例
         }
+    },
+    watch: {
+        content: {
+            immediate: true,
+            handler(newValue, oldValue, vm, mnt) {
+                console.log('Content has changed: ' + newValue);
+                // 取消 watch
+                // 当 `immediate` 为 true 时，需要确保取消函数存在
+                if (mnt.unwatchMapper.content) {
+                    mnt.unwatchMapper.content();
+                }
+            }
+        }
     }
 });
 
@@ -185,15 +198,15 @@ alertVm = mountAlert.mount();
 
 ## **`props`**
 - **类型:** { Object }
-- **默认值:** 指定传入组件的 props 值。
+- **说明:** 指定传入组件的 props 值。
 
 ## **`data`**
 - **类型:** { Object }
-- **默认值:** 指定的值将会在实例创建完毕（也可能未挂载）时修改组件内部响应式数据。
+- **说明:** 指定的值将会在实例创建完毕（也可能未挂载）时修改组件内部响应式数据。
 
 ## **`on`**
 - **类型:** { [event: string]: Function | Object }
-- **默认值:** 将事件侦听器附加到组件实例。
+- **说明:** 将事件侦听器附加到组件实例。
     - **内置** 事件:
         - `mount:mount`: 在调用 `mount` 方法或准备挂载组件时触发。
         - `mount:destroy`: 触发​​何时（底层）调用 `destroy` 方法
@@ -225,6 +238,40 @@ alertVm = mountAlert.mount();
         }
     })
     ```
+
+## **`watch`**
+- **类型:** { [key: string]: Function | Object }
+- **说明:** 一个对象，键是需要观察的表达式，值是对应回调函数。值也可以是方法名，或者包含选项的对象。
+    - 当传入**配置对象**:
+        - `immediate` { Boolean }: Passing in `immediate: true` in the option will trigger the callback immediately with the current value of the expression.
+        - `deep` { Boolean }: 为了发现对象内部值的变化，可以在选项参数中指定 deep: true 。注意监听数组的变动不需要这么做。
+        - `handler` { Function }: 值更改时的回调函数。与 Vue 的回调函数（[vm.$watch](https://vuejs.org/v2/api/index.html#vm-watch)）相比，此回调函数通常有4个参数，如：newValue、oldValue、vm、mnt。最后两个辅助参数是：`当前组件实例` 和 `当前 Mount 实例`。
+
+        > 回调函数的 `this` 指向为**当前的 Mount 实例**，当然你可以使用**箭头函数**来避免这一行为。
+    - **Unwatch**: 传给 `watch` 选项每个键都将添加到 Mount 实例的属性 `unwatchMapper` 中，您可以调用类似 `mnt.unwatchMapper.attr()` 的方法来取消监听。
+- **用例:**
+    ```js
+    mount(Alert, {
+        watch: {
+            otherAttr(newV) {
+                console.log(newV);
+            }
+            attr: {
+                handler(newValue, oldValue, vm, mnt) {
+                    console.log(args);
+                    // 取消 watch
+                    // 当 `immediate` 为 true 时，需要确保取消函数存在
+                    if (mnt.unwatchMapper.content) {
+                        mnt.unwatchMapper.content();
+                    }
+                },
+                immediate: true,
+            },
+        }
+    })
+    ```
+> 注意：只有在 `data` 选项中**提前声明数据**，值变化时监听回调函数才能被正常调用。
+
 
 
 ---

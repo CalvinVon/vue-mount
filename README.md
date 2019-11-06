@@ -27,12 +27,16 @@ A tool for dynamic mounting Vue components and maintaining the component tree.
     - [props](#props)
     - [data](#data)
     - [on](#on)
+    - [watch](#watch)
 - [Methods](#Methods)
     - [getInstance(MountOptions)](#getInstanceMountOptions)
     - [mount(MountOptions)](#mountMountOptions)
     - [set(MountDataOptions)](#setMountDataOptions)
     - [destroy()](#destroy)
     - [getDom()](#getDom)
+- [Methods added on components](#Methods-added-on-components)
+    - [$getMount()](#getMount)
+- [CHANGELOG](#CHANGELOG)
 
 ---
 
@@ -97,6 +101,19 @@ const mountAlert = new Mount(Alert, {
         'some-event'(eventData, vm, mnt) {
             // vm is a component instance
             // mnt is current Mount instance
+        }
+    },
+    watch: {
+        content: {
+            immediate: true,
+            handler(newValue, oldValue, vm, mnt) {
+                console.log('Content has changed: ' + newValue);
+                // do unwatch
+                // make sure the unwatch method exsit while `immediate` is true
+                if (mnt.unwatchMapper.content) {
+                    mnt.unwatchMapper.content();
+                }
+            }
         }
     }
 });
@@ -221,6 +238,40 @@ alertVm = mountAlert.mount();
         }
     })
     ```
+
+## **`watch`**
+- **Type:** { [key: string]: Function | Object }
+- **Details:** An object where keys are expressions to watch and values are the corresponding callbacks. The value can also be a string of a method name, or an Object that contains additional options.
+    - **Object configure**:
+        - `immediate` { Boolean }: Passing in `immediate: true` in the option will trigger the callback immediately with the current value of the expression.
+        - `deep` { Boolean }: To also detect nested value changes inside Objects, you need to pass in `deep: true` in the options argument.
+        - `handler` { Function }: The callback function when the value changes. Compared to the callback function of Vue ([vm.$watch](https://vuejs.org/v2/api/index.html#vm-watch)), there are always be 4 parameters like: `newValue, oldValue, vm, mnt`. The last two additional arguments are current `Vue component` and current `Mount instance`.
+
+        > The `this` argument of the callback function points to the current **Mount instance**, although you can use the **arrow function** to avoid this behavior.
+    - **Unwatch**: Each key you passed in the `watch` option will be added to the attribute `unwatchMapper` of Mount instance, you can call the method like `mnt.unwatchMapper.attr()` to unwatch it.
+- **Examples:**
+    ```js
+    mount(Alert, {
+        watch: {
+            otherAttr(newV) {
+                console.log(newV);
+            }
+            attr: {
+                handler(newValue, oldValue, vm, mnt) {
+                    console.log(args);
+                    // do unwatch
+                    // make sure the unwatch method exsit while `immediate` is true
+                    if (mnt.unwatchMapper.content) {
+                        mnt.unwatchMapper.content();
+                    }
+                },
+                immediate: true,
+            },
+        }
+    })
+    ```
+> Attention: Only **declare the data upfront** in the `data` option, the callback function can be called.
+
 
 # Methods
 ## **`getInstance(MountOptions)`**
