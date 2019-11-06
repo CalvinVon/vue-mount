@@ -1,6 +1,14 @@
 import Vue from 'vue';
 import Mount from './mount';
 
+function inspectVueVersion() {
+    const version = Number(Vue.version.split('.')[0])
+
+    if (version !== 2) {
+        console.error('[vue-mount] Only the 2.x version of Vue is guaranteed to be compatible, please use Vue.js 2.x instead.');
+    }
+}
+
 function isOneOf(value, ...opt) {
     let options = opt;
     if (isType(opt[0]) === 'Array') {
@@ -106,6 +114,7 @@ function checkAndRmUnmountedVm(vm) {
 }
 
 export {
+    inspectVueVersion,
     isOneOf,
     isType,
     isEmptyObject,

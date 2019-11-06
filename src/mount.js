@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import {
+    inspectVueVersion,
     isOneOf,
     isType,
     isEmptyObject,
@@ -28,6 +29,7 @@ function parseOptions(options) {
         props = {},
         data = {},
         on = {},
+        watch = {},
         target = 'new',
         mode = 'replace',
         root = '#app',
@@ -45,9 +47,47 @@ function parseOptions(options) {
         mode,
         propsData: props,
         targetData: data,
+        targetWatch: watch,
         targetEventListener: on,
         rootOptions
     };
+}
+
+
+function applyTargetWithData(mountInstance, data) {
+    const instance = mountInstance.component_instance;
+    if (isType(data, 'Object')) {
+        Object.assign(instance, data);
+    }
+}
+
+
+function applyTargetWithWatch(mountInstance, watchOptions) {
+
+    function rewriteHandler(handler) {
+        const originHandler = handler || new Function;
+
+        return function handlerWrapper(...args) {
+            originHandler.apply(mountInstance, [...args, instance, mountInstance]);
+        }
+    }
+
+    if (!isType(watchOptions, 'Object')) return;
+
+    const instance = mountInstance.component_instance;
+    Object.keys(watchOptions).forEach(key => {
+        const watchOption = watchOptions[key];
+        if (isType(watchOption, 'Object')) {
+            watchOption.handler = rewriteHandler(watchOption.handler);
+            const unwatch = instance.$watch(key, watchOption);
+            mountInstance.unwatchMapper[key] = unwatch;
+        }
+
+        if (isType(watchOption, 'Function')) {
+            const unwatch = instance.$watch(key, rewriteHandler(watchOption));
+            mountInstance.unwatchMapper[key] = unwatch;
+        }
+    })
 }
 
 class Mount {
@@ -55,14 +95,16 @@ class Mount {
     component_options;
     component_constructor;
     component_instance;
+    unwatchMapper = {};
 
-    _to_append_component = false;
-    _to_append_root = false;
+    _to_mount_component = false;
+    _to_mount_root = false;
     _to_create_root = false;
     _is_destroyed = false;
     _created_root_vue;
 
     constructor(component, options) {
+        inspectVueVersion();
         this.component_options = component;
         this.options = parseOptions(options);
         this.component_constructor = Vue.extend(component);
@@ -92,25 +134,23 @@ class Mount {
         // Has specific target element
         if (options.targetElement) {
             if (!isVueInstance(options.targetElement) && !findParentVm(options.targetElement)) {
-                this._to_append_root = true;
+                this._to_mount_root = true;
                 this._to_create_root = true;
             }
             else {
-                this._to_append_component = true;
+                this._to_mount_component = true;
                 this.component_instance = new this.component_constructor(options);
             }
         }
 
-        // Would mount append to root
+        // Should mount append to root
         else if (isOneOf(options.target, 'root', 'new')) {
-            this._to_append_root = true;
+            this._to_mount_root = true;
 
             if (options.rootVm && options.target !== 'new') {
-                const instance = this.component_instance = new this.component_constructor(options);
-                if (isType(options.targetData, 'Object')) {
-                    Object.assign(instance, options.targetData);
-                }
+                this.component_instance = new this.component_constructor(options);
             }
+            // Should create new root
             else {
                 this._to_create_root = true;
             }
@@ -119,7 +159,7 @@ class Mount {
             throw new Error(`[vue-mount] Can't mount to target with value [${options.target}]`);
         }
 
-        if (this._to_append_root) {
+        if (this._to_mount_root) {
             if (this._to_create_root) {
                 const rootOptions = {
                     data: options.propsData,
@@ -160,14 +200,14 @@ class Mount {
         }
 
         // Modify component data
-        if (isType(options.targetData, 'Object')) {
-            Object.assign(this.component_instance, options.targetData);
-        }
+        applyTargetWithData(this, options.targetData);
+        // Apply watch options
+        applyTargetWithWatch(this, options.targetWatch);
 
         // Attach component event listeners
         this._attachEventListeners(options.targetEventListener);
 
-        if (this._to_append_root && this._to_create_root) {
+        if (this._to_mount_root && this._to_create_root) {
             // Emit instance mount event
             this.component_instance.$emit('mount:mount');
         }
@@ -197,7 +237,7 @@ class Mount {
         if (instance._isMounted) return instance;
 
         // Append to root vue instance
-        if (this._to_append_root) {
+        if (this._to_mount_root) {
             if (!this._to_create_root) {
                 checkAndRmUnmountedVm(options.rootVm);
                 instance.$root = options.rootVm;
@@ -264,11 +304,13 @@ class Mount {
      */
     set(opt) {
         const instance = this.component_instance = this.getInstance();
-        const { props = {}, data = {}, on = {} } = opt || {};
+        const { props = {}, data = {}, on = {}, watch = {} } = opt || {};
 
         if (isType(data, 'Object')) {
             Object.assign(instance, data);
         }
+
+        applyTargetWithWatch(this, watch);
 
         let _props = instance.$props;
         if (this._to_create_root) {
@@ -294,11 +336,12 @@ class Mount {
         instance.$el && instance.$el.parentNode.removeChild(instance.$el);
         this.component_instance = null;
 
-        this._to_append_component = false;
-        this._to_append_root = false;
+        this._to_mount_component = false;
+        this._to_mount_root = false;
         this._to_create_root = false;
         this._created_root_vue = null;
         this._is_destroyed = true;
+        this.unwatchMapper = {};
         return instance;
     }
 

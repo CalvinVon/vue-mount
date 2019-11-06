@@ -1,10 +1,9 @@
 <template>
     <div class="alert">
-        {{ _uid }}
         <div class="alert-main"
              v-for="item in notices"
              :key="item.name">
-            <div class="alert-content">{{ item.content }}</div>
+            <div class="alert-content">{{ _uid }} {{ item.content }}</div>
         </div>
     </div>
 </template>
@@ -23,9 +22,10 @@ export default {
         return {
             target: null,
             uid: this._uid,
+            attr: '',
             notices: [
                 {
-                    content: "Alert-Alert-Alert-Alert",
+                    content: "Alert",
                     duration: 10
                 }
             ],

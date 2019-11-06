@@ -3,7 +3,7 @@ import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
 import _createClass from "@babel/runtime/helpers/createClass";
 import _defineProperty from "@babel/runtime/helpers/defineProperty";
 import Vue from 'vue';
-import { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement, checkAndRmUnmountedVm } from './utils';
+import { inspectVueVersion, isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement, checkAndRmUnmountedVm } from './utils';
 /**
  * Parse options
  * @param {MountOptions} options
@@ -26,6 +26,8 @@ function parseOptions(options) {
       data = _ref$data === void 0 ? {} : _ref$data,
       _ref$on = _ref.on,
       on = _ref$on === void 0 ? {} : _ref$on,
+      _ref$watch = _ref.watch,
+      watch = _ref$watch === void 0 ? {} : _ref$watch,
       _ref$target = _ref.target,
       target = _ref$target === void 0 ? 'new' : _ref$target,
       _ref$mode = _ref.mode,
@@ -46,9 +48,49 @@ function parseOptions(options) {
     mode: mode,
     propsData: props,
     targetData: data,
+    targetWatch: watch,
     targetEventListener: on,
     rootOptions: rootOptions
   };
+}
+
+function applyTargetWithData(mountInstance, data) {
+  var instance = mountInstance.component_instance;
+
+  if (isType(data, 'Object')) {
+    Object.assign(instance, data);
+  }
+}
+
+function applyTargetWithWatch(mountInstance, watchOptions) {
+  function rewriteHandler(handler) {
+    var originHandler = handler || new Function();
+    return function handlerWrapper() {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      originHandler.apply(mountInstance, [].concat(args, [instance, mountInstance]));
+    };
+  }
+
+  if (!isType(watchOptions, 'Object')) return;
+  var instance = mountInstance.component_instance;
+  Object.keys(watchOptions).forEach(function (key) {
+    var watchOption = watchOptions[key];
+
+    if (isType(watchOption, 'Object')) {
+      watchOption.handler = rewriteHandler(watchOption.handler);
+      var unwatch = instance.$watch(key, watchOption);
+      mountInstance.unwatchMapper[key] = unwatch;
+    }
+
+    if (isType(watchOption, 'Function')) {
+      var _unwatch = instance.$watch(key, rewriteHandler(watchOption));
+
+      mountInstance.unwatchMapper[key] = _unwatch;
+    }
+  });
 }
 
 var Mount =
@@ -65,9 +107,11 @@ function () {
 
     _defineProperty(this, "component_instance", void 0);
 
-    _defineProperty(this, "_to_append_component", false);
+    _defineProperty(this, "unwatchMapper", {});
 
-    _defineProperty(this, "_to_append_root", false);
+    _defineProperty(this, "_to_mount_component", false);
+
+    _defineProperty(this, "_to_mount_root", false);
 
     _defineProperty(this, "_to_create_root", false);
 
@@ -75,6 +119,7 @@ function () {
 
     _defineProperty(this, "_created_root_vue", void 0);
 
+    inspectVueVersion();
     this.component_options = component;
     this.options = parseOptions(options);
     this.component_constructor = Vue.extend(component);
@@ -108,30 +153,27 @@ function () {
 
       if (options.targetElement) {
         if (!isVueInstance(options.targetElement) && !findParentVm(options.targetElement)) {
-          this._to_append_root = true;
+          this._to_mount_root = true;
           this._to_create_root = true;
         } else {
-          this._to_append_component = true;
+          this._to_mount_component = true;
           this.component_instance = new this.component_constructor(options);
         }
-      } // Would mount append to root
+      } // Should mount append to root
       else if (isOneOf(options.target, 'root', 'new')) {
-          this._to_append_root = true;
+          this._to_mount_root = true;
 
           if (options.rootVm && options.target !== 'new') {
-            var instance = this.component_instance = new this.component_constructor(options);
-
-            if (isType(options.targetData, 'Object')) {
-              Object.assign(instance, options.targetData);
+            this.component_instance = new this.component_constructor(options);
+          } // Should create new root
+          else {
+              this._to_create_root = true;
             }
-          } else {
-            this._to_create_root = true;
-          }
         } else {
           throw new Error("[vue-mount] Can't mount to target with value [".concat(options.target, "]"));
         }
 
-      if (this._to_append_root) {
+      if (this._to_mount_root) {
         if (this._to_create_root) {
           var rootOptions = {
             data: options.propsData,
@@ -172,14 +214,13 @@ function () {
       } // Modify component data
 
 
-      if (isType(options.targetData, 'Object')) {
-        Object.assign(this.component_instance, options.targetData);
-      } // Attach component event listeners
+      applyTargetWithData(this, options.targetData); // Apply watch options
 
+      applyTargetWithWatch(this, options.targetWatch); // Attach component event listeners
 
       this._attachEventListeners(options.targetEventListener);
 
-      if (this._to_append_root && this._to_create_root) {
+      if (this._to_mount_root && this._to_create_root) {
         // Emit instance mount event
         this.component_instance.$emit('mount:mount');
       }
@@ -211,7 +252,7 @@ function () {
 
       if (instance._isMounted) return instance; // Append to root vue instance
 
-      if (this._to_append_root) {
+      if (this._to_mount_root) {
         if (!this._to_create_root) {
           checkAndRmUnmountedVm(options.rootVm);
           instance.$root = options.rootVm;
@@ -279,12 +320,15 @@ function () {
           _ref2$data = _ref2.data,
           data = _ref2$data === void 0 ? {} : _ref2$data,
           _ref2$on = _ref2.on,
-          on = _ref2$on === void 0 ? {} : _ref2$on;
+          on = _ref2$on === void 0 ? {} : _ref2$on,
+          _ref2$watch = _ref2.watch,
+          watch = _ref2$watch === void 0 ? {} : _ref2$watch;
 
       if (isType(data, 'Object')) {
         Object.assign(instance, data);
       }
 
+      applyTargetWithWatch(this, watch);
       var _props = instance.$props;
 
       if (this._to_create_root) {
@@ -312,11 +356,12 @@ function () {
       instance.$destroy();
       instance.$el && instance.$el.parentNode.removeChild(instance.$el);
       this.component_instance = null;
-      this._to_append_component = false;
-      this._to_append_root = false;
+      this._to_mount_component = false;
+      this._to_mount_root = false;
       this._to_create_root = false;
       this._created_root_vue = null;
       this._is_destroyed = true;
+      this.unwatchMapper = {};
       return instance;
     }
   }, {
@@ -350,8 +395,8 @@ function () {
           }
 
           var callback = function callback() {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
+            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+              args[_key2] = arguments[_key2];
             }
 
             eventListener.apply(_this2, [].concat(args, [_this2.component_instance, _this2]));

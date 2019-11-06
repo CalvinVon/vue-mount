@@ -1,6 +1,14 @@
 import Vue from 'vue';
 import Mount from './mount';
 
+function inspectVueVersion() {
+  var version = Number(Vue.version.split('.')[0]);
+
+  if (version !== 2) {
+    console.error('[vue-mount] Only the 2.x version of Vue is guaranteed to be compatible, please use Vue.js 2.x instead.');
+  }
+}
+
 function isOneOf(value) {
   for (var _len = arguments.length, opt = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
     opt[_key - 1] = arguments[_key];
@@ -115,4 +123,4 @@ function checkAndRmUnmountedVm(vm) {
   });
 }
 
-export { isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, isMountInstance, getElement, findParentVm, checkAndRmUnmountedVm };
+export { inspectVueVersion, isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, isMountInstance, getElement, findParentVm, checkAndRmUnmountedVm };
