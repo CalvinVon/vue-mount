@@ -67,8 +67,8 @@ function applyTargetWithWatch(mountInstance, watchOptions) {
     function rewriteHandler(handler) {
         const originHandler = handler || new Function;
 
-        return function handlerWrapper(...args) {
-            originHandler.apply(mountInstance, [...args, instance, mountInstance]);
+        return function handlerWrapper(newValue, oldValue) {
+            originHandler.apply(mountInstance, [newValue, oldValue, instance, mountInstance]);
         }
     }
 
