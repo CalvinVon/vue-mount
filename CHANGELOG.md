@@ -1,5 +1,13 @@
-## 0.5.5 (2019-11-05)
+# 0.6.0 (2019-11-12)
 
+### Features
+
+* add new MountOption: watch ([b698214](https://github.com/CalvinVon/vue-mount/commit/b698214))
+* **watch:** adjust the callback function to ensure that there are always four parameters ([e4d94ee](https://github.com/CalvinVon/vue-mount/commit/e4d94ee))
+
+
+
+## 0.5.5 (2019-11-05)
 
 ### Bug Fixes
 
