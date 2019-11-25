@@ -1,3 +1,10 @@
+## 0.6.1 (2019-11-25)
+
+### Bug Fixes
+
+* fix bug calling `set` method when the component has no `props` passed in ([e3e1cf1](https://github.com/CalvinVon/vue-mount/commit/e3e1cf1))
+
+
 # 0.6.0 (2019-11-12)
 
 ### Features
