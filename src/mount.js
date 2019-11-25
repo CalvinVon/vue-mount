@@ -312,7 +312,7 @@ class Mount {
 
         applyTargetWithWatch(this, watch);
 
-        let _props = instance.$props;
+        let _props = instance.$props || {};
         if (this._to_create_root) {
             _props = this._created_root_vue;
         }

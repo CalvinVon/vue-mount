@@ -325,7 +325,8 @@ function () {
       }
 
       applyTargetWithWatch(this, watch);
-      var _props = instance.$props;
+
+      var _props = instance.$props || {};
 
       if (this._to_create_root) {
         _props = this._created_root_vue;
