@@ -36,7 +36,7 @@
 
 
 <script>
-import Mount, { mount } from "../../src";
+import Mount, { mount } from "../../../src";
 import Alert from "./alert";
 
 export default {
