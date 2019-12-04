@@ -1,9 +1,9 @@
 {
   "name": "vue-mount",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "A tool for dynamic mounting Vue components.",
   "main": "lib/index.js",
-  "module": "es/index.js",
+  "module": "src/index.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build:lib": "cross-env BABEL_ENV=umd babel src --out-dir lib",
