@@ -1,3 +1,10 @@
+## 0.6.2 (2019-12-04)
+
+### Bug Fixes
+
+* fix the bug that *passing options multiple times will overwrite the previous. ([fe23366](https://github.com/CalvinVon/vue-mount/commit/fe23366))
+
+
 ## 0.6.1 (2019-11-25)
 
 ### Bug Fixes
