@@ -54,6 +54,31 @@ function parseOptions(options) {
 }
 
 
+/**
+ * Merge options
+ * @param {MountOptions} target 
+ * @param {MountOptions} source 
+ * @returns {MountOptions}
+ */
+function mergeOptions(target, source) {
+    const fields = [
+        'propsData',
+        'targetData',
+        'targetWatch',
+        'targetEventListener',
+        'rootOptions',
+    ];
+
+    fields.forEach(field => {
+        if (typeof source[field] === 'object') {
+            target[field] = Object.assign({}, target[field], source[field]);
+        }
+    });
+
+    return target;
+}
+
+
 function applyTargetWithData(mountInstance, data) {
     const instance = mountInstance.component_instance;
     if (isType(data, 'Object')) {
@@ -118,7 +143,7 @@ class Mount {
      * @returns {Vue} Vue instance
      */
     getInstance(opt = {}) {
-        const options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
+        const options = isEmptyObject(opt) ? this.options : mergeOptions(this.options, parseOptions(opt));
 
         if (this.component_instance) {
             // Instance has been/is being destroyed

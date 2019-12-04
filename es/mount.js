@@ -2,6 +2,7 @@ import _toConsumableArray from "@babel/runtime/helpers/toConsumableArray";
 import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
 import _createClass from "@babel/runtime/helpers/createClass";
 import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import _typeof from "@babel/runtime/helpers/typeof";
 import Vue from 'vue';
 import { inspectVueVersion, isOneOf, isType, isEmptyObject, isVueInstance, isRootVue, findParentVm, getElement, checkAndRmUnmountedVm } from './utils';
 /**
@@ -52,6 +53,23 @@ function parseOptions(options) {
     targetEventListener: on,
     rootOptions: rootOptions
   };
+}
+/**
+ * Merge options
+ * @param {MountOptions} target 
+ * @param {MountOptions} source 
+ * @returns {MountOptions}
+ */
+
+
+function mergeOptions(target, source) {
+  var fields = ['propsData', 'targetData', 'targetWatch', 'targetEventListener', 'rootOptions'];
+  fields.forEach(function (field) {
+    if (_typeof(source[field]) === 'object') {
+      target[field] = Object.assign({}, target[field], source[field]);
+    }
+  });
+  return target;
 }
 
 function applyTargetWithData(mountInstance, data) {
@@ -134,7 +152,7 @@ function () {
       var _this = this;
 
       var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var options = isEmptyObject(opt) ? this.options : Object.assign(this.options, parseOptions(opt));
+      var options = isEmptyObject(opt) ? this.options : mergeOptions(this.options, parseOptions(opt));
 
       if (this.component_instance) {
         // Instance has been/is being destroyed
