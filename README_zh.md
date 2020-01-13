@@ -35,6 +35,8 @@ vue-mount —— 一个动态加载 Vue 组件并维护组件树的工具库。
     - [getDom()](#getDom)
 - [在组件上添加的方法](#在组件上添加的方法)
     - [$getMount()](#getMount)
+- [已知的问题](#已知的问题)
+    - [无法访问到 `$router`/`$store`](#无法访问到`$router`/`$store`)
 - [CHANGELOG](#CHANGELOG)
 
 # 开始
@@ -154,7 +156,7 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
     
-> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到形如 `Vue.prototype.$xxx` 或创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例）；其他情况下，`vue-mount` 会自动查询并加入组件树上下文。
+> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例，但是存在[替代方案](#无法访问到-router-store)）；其他情况下，`vue-mount` 会自动查询并加入组件树上下文。
 
 
 ## **`mode`**
@@ -316,5 +318,40 @@ alertVm = mountAlert.mount();
 - **返回:** { VueMount }
 - **说明:** 返回组件实例相关联的 VueMount 实例。
 
+---
+
+# 已知的问题
+## 无法访问到 `$router`/`$store`
+
+- 当 VueMount 将组件挂载到**新的 Vue 根实例**上时，该组件将无法获取到在原根组件配置的 `$router`/`$store` 等属性（[原因](#target)），当然也有以下方式来解决该问题。
+
+    ```js
+    mount(Component, {
+        ...
+        data: {
+            $store: this.$store,
+            // 为什么不是 $router? VueRouter 在内部使用了 Object.defineProperty 方法并只设置了 getter 属性，故在该组件无法覆盖这个值
+            router: this.$router,
+            ...
+        },
+        ...
+    });
+    ```
+    然后就便可在组件内部使用 `this.$store`/`this.router` 得到该值。
+
+- 当组件已经挂载在原根实例上，但在组件的 `created`/`mounted` 等生命周期内获取不到该值时，需要使用 VueMount [内置的事件](#on) 来解决：
+    ```js
+    mount(Component, {
+        ...
+        on: {
+            'mount:mount'(vm) {
+                vm.$router;
+                vm.$store;
+            }
+        },
+        ...
+    }
+    ```
+    原因是 VueMount 在内部统一在组件之后才计算父组件。
 ---
 # [CHANGELOG](./CHANGELOG.md)
