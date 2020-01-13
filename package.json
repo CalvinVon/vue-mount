@@ -1,6 +1,6 @@
 {
   "name": "vue-mount",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "A tool for dynamic mounting Vue components.",
   "main": "lib/index.js",
   "module": "src/index.js",

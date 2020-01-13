@@ -106,6 +106,24 @@ function applyTargetWithWatch(mountInstance, watchOptions) {
     }
   });
 }
+/**
+ * setup the component $route/$router attribute
+ * @param {VueComponent} vm
+ */
+
+
+function setupVueRouter(vm) {
+  vm._routerRoot = vm.$parent && vm.$parent._routerRoot || vm;
+}
+/**
+ * setup the component $store attribute
+ * @param {VueComponent} vm
+ */
+
+
+function setupVueStore(vm) {
+  vm.$store = vm.$parent.$store;
+}
 
 var Mount =
 /*#__PURE__*/
@@ -312,6 +330,8 @@ function () {
           }
         }
 
+      setupVueRouter(instance);
+      setupVueStore(instance);
       instance.$el.__mount__ = this; // Emit instance mount event
 
       instance.$emit('mount:mount');
