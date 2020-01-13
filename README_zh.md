@@ -156,7 +156,7 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
     
-> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例，但是存在[替代方案](#无法访问到-router-store)）；其他情况下，`vue-mount` 会自动查询并加入组件树上下文。
+> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例，但是存在[替代方案](#无法访问到-routerstore)）；其他情况下，`vue-mount` 会自动查询并加入组件树上下文。
 
 
 ## **`mode`**

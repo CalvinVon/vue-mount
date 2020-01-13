@@ -1,3 +1,10 @@
+## 0.6.3 (2020-01-13)
+
+### Bug Fixes
+
+* mounted instance can access `$router` or `$store` ([37267c6](https://github.com/CalvinVon/vue-mount/commit/37267c6))
+
+
 ## 0.6.2 (2019-12-04)
 
 ### Bug Fixes
