@@ -36,6 +36,8 @@ A tool for dynamic mounting Vue components and maintaining the component tree.
     - [getDom()](#getDom)
 - [Methods added on components](#Methods-added-on-components)
     - [$getMount()](#getMount)
+- [Known issues](#known-issues)
+    - [Unable to access $router/$store](#Unable-to-access-routerstore)
 - [CHANGELOG](#CHANGELOG)
 
 ---
@@ -155,7 +157,7 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
 
-> **Special Note**: When configured as `new`, the mounted component cannot access the configuration passed in the form of `Vue.prototype.$xxx` or when creating the root instance, resulting in the mounted component UNABLE to access configuration globally registered on the root component such as `this.$router` (because a new root instance was created); In other cases, `vue-mount` will automatically query and join the component tree context.
+> **Special Note**: When configured as `new`, the mounted component cannot access the configuration passed in the root instance, resulting in the mounted component UNABLE to access configuration globally registered on the root component such as `this.$router` (because a new root instance was created, but there is [alternative](#Unable-to-access-routerstore)); In other cases, `vue-mount` will automatically query and join the component tree context.
 
 ## **`mode`**
 - **Type:** { string }
@@ -310,6 +312,44 @@ alertVm = mountAlert.mount();
 ## **`$getMount()`**
 - **Returns:** { VueMount }
 - **Details:** returns the VueMount instance associated with the component instance.
+
+
+---
+
+# Known issues
+## Unable to access `$router`/`$store`
+
+- When VueMount mounts the component to **a new Vue root instance**, the component will not be able to obtain the `$router`/ `$store` and other attributes ([reason](#target)) configured in the original root component. Of course, there are the following ways to solve this problem.
+
+
+    ```js
+    mount(Component, {
+        ...
+        data: {
+            $store: this.$store,
+            // Why not $router? VueRouter uses the object.defineProperty method internally and only sets the getter property, so this value cannot be overridden
+            router: this.$router,
+            ...
+        },
+        ...
+    });
+    ```
+    Then you can use `this.$store` / `this.router` inside the component to access.
+
+- When the component has been mounted on the original root instance, but the value cannot be obtained in the component's `created` / `mounted` lifecycle hooks, you need to use VueMount [built-in event](#on) to solve the problem:
+
+    ```js
+    mount(Component, {
+        ...
+        on: {
+            'mount:mount'(vm) {
+                vm.$router;
+                vm.$store;
+            }
+        },
+        ...
+    }
+    ```
 
 ---
 # [CHANGELOG](./CHANGELOG.md)
