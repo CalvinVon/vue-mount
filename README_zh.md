@@ -36,7 +36,7 @@ vue-mount —— 一个动态加载 Vue 组件并维护组件树的工具库。
 - [在组件上添加的方法](#在组件上添加的方法)
     - [$getMount()](#getMount)
 - [已知的问题](#已知的问题)
-    - [无法访问到 `$router`/`$store`](#无法访问到`$router`/`$store`)
+    - [无法访问到 `$router`/`$store`](#无法访问到-routerstore)
 - [CHANGELOG](#CHANGELOG)
 
 # 开始
@@ -337,7 +337,7 @@ alertVm = mountAlert.mount();
         ...
     });
     ```
-    然后就便可在组件内部使用 `this.$store`/`this.router` 得到该值。
+    随后可在组件内部使用 `this.$store`/`this.router` 来得到该值。
 
 - 当组件已经挂载在原根实例上，但在组件的 `created`/`mounted` 等生命周期内获取不到该值时，需要使用 VueMount [内置的事件](#on) 来解决：
     ```js
@@ -352,6 +352,6 @@ alertVm = mountAlert.mount();
         ...
     }
     ```
-    原因是 VueMount 在内部统一在组件之后才计算父组件。
+    原因是现版本 VueMount 在内部统一在组件挂载之后才计算父组件取值。
 ---
 # [CHANGELOG](./CHANGELOG.md)
